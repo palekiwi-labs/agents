@@ -1,0 +1,59 @@
+# ----------------------------------------------------------------
+# Project-Specific
+# ----------------------------------------------------------------
+# Ignore the cloned sub-repository workspace
+/workspace
+
+
+# ----------------------------------------------------------------
+# macOS
+# ----------------------------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+# Thumbnails
+._*
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+
+# ----------------------------------------------------------------
+# Vim & Neovim
+# ----------------------------------------------------------------
+# Swap files
+*.sw[a-p]
+# Session files
+Session.vim
+# Backup & undo files
+*~
+*.bak
+*.un~
+
+
+# ----------------------------------------------------------------
+# Visual Studio Code
+# ----------------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+
+# ----------------------------------------------------------------
+# Sublime Text
+# ----------------------------------------------------------------
+# Project and workspace files
+*.sublime-project
+*.sublime-workspace
+# Session files
+*.sublime_session
+# Other settings
+*.sublime-settings
