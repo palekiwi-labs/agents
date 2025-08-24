@@ -9,9 +9,16 @@ rec {
     name = "agent-base";
     tag = "latest";
 
-    copyToRoot = pkgs.buildEnv {
+    copyToRoot = with pkgs; buildEnv {
       name = "image-root";
-      paths = [ pkgs.bashInteractive pkgs.coreutils pkgs.gnugrep ];
+      paths = [
+        bashInteractive
+        coreutils
+        git
+        gnugrep
+        gnutar
+        gzip
+      ];
       pathsToLink = [ "/bin" ];
     };
 
