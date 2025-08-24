@@ -4,6 +4,14 @@
 # Ignore the cloned sub-repository workspace
 /workspace
 
+# ----------------------------------------------------------------
+# Nix Build
+# ----------------------------------------------------------------
+# Ignore the cloned sub-repository workspace
+
+result
+result-*
+
 
 # ----------------------------------------------------------------
 # macOS

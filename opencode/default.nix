@@ -1,0 +1,54 @@
+{ pkgs }:
+
+let
+  inherit (pkgs.dockerTools) buildImage streamLayeredImage;
+in
+
+rec {
+  base = buildImage {
+    name = "agent-base";
+    tag = "latest";
+
+    copyToRoot = pkgs.buildEnv {
+      name = "image-root";
+      paths = [ pkgs.bashInteractive pkgs.coreutils pkgs.gnugrep ];
+      pathsToLink = [ "/bin" ];
+    };
+
+    runAsRoot = ''
+      #!${pkgs.runtimeShell}
+      ${pkgs.dockerTools.shadowSetup}
+      groupadd agent
+      useradd -g agent -m -d /home/agent agent
+
+      mkdir -p /workspace
+      chown agent:agent /workspace
+
+      mkdir /home/agent/.cache
+      chown agent:agent /home/agent/.cache
+
+      mkdir /home/agent/.local
+      chown agent:agent /home/agent/.local
+    '';
+  };
+
+  opencode = streamLayeredImage {
+    name = "agent-opencode";
+    tag = "latest";
+
+    fromImage = base;
+
+    contents = [ pkgs.opencode ];
+
+    config = {
+      User = "agent";
+      Cmd = [ "opencode" ];
+      WorkingDir = "/workspace";
+      Volumes = {
+        "/workspace" = { };
+        "/home/agent/.cache" = { };
+        "/home/agent/.local" = { };
+      };
+    };
+  };
+}
