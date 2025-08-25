@@ -53,6 +53,7 @@
               --memory 512m \
               --cpus 1.0 \
               --pids-limit 100 \
+              -e USER="agent" \
               -v "opencode-cache:/home/agent/.cache:rw" \
               -v "opencode-local:/home/agent/.local:rw" \
               -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
