@@ -54,8 +54,8 @@
               --cpus 1.0 \
               --pids-limit 100 \
               -e USER="agent" \
-              -e TERM="$TERM" \
-              -e COLORTERM="$COLORTERM" \
+              -e TERM="xterm-256color" \
+              -e COLORTERM="truecolor" \
               -e FORCE_COLOR=1 \
               -v "opencode-cache:/home/agent/.cache:rw" \
               -v "opencode-local:/home/agent/.local:rw" \
