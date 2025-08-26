@@ -59,8 +59,8 @@
               -e TERM="xterm-256color" \
               -e COLORTERM="truecolor" \
               -e FORCE_COLOR=1 \
-              -v "opencode-cache:/home/agent/.cache:rw" \
-              -v "opencode-local:/home/agent/.local:rw" \
+              -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
+              -v "opencode-local-$PORT:/home/agent/.local:rw" \
               -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
               -v "$WORKSPACE:/workspace:rw" \
               "$IMAGE_NAME:latest" opencode --port 80 --hostname 0.0.0.0 "$@"
