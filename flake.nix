@@ -64,7 +64,7 @@
               -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
               -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
               --workdir "/workspace/$(basename "$WORKSPACE")" \
-              "$IMAGE_NAME:latest" opencode --port 80 --hostname 0.0.0.0 "$@"
+              "$IMAGE_NAME:latest" opencode "$@"
           '';
         };
 
