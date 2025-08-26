@@ -30,6 +30,7 @@
             mkdir -p "$CONFIG_DIR"
 
             WORKSPACE="''${OPENCODE_WORKSPACE:-""}"
+            PORT="''${OPENCODE_PORT:-"49000"}"
 
             if [[ -z "$WORKSPACE" ]]; then
               echo "Error: OPENCODE_WORKSPACE environment variable is required" >&2
@@ -53,6 +54,7 @@
               --memory 512m \
               --cpus 1.0 \
               --pids-limit 100 \
+              -p "$PORT:80" \
               -e USER="agent" \
               -e TERM="xterm-256color" \
               -e COLORTERM="truecolor" \
@@ -61,7 +63,7 @@
               -v "opencode-local:/home/agent/.local:rw" \
               -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
               -v "$WORKSPACE:/workspace:rw" \
-              "$IMAGE_NAME:latest" "$@"
+              "$IMAGE_NAME:latest" opencode --port 80 --hostname 0.0.0.0 "$@"
           '';
         };
 
