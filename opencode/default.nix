@@ -18,6 +18,7 @@ rec {
         gnugrep
         gnutar
         gzip
+        ripgrep
       ];
       pathsToLink = [ "/bin" ];
     };
