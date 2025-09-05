@@ -16,9 +16,11 @@ rec {
         coreutils
         git
         gnugrep
+        gnused
         gnutar
         gzip
         ripgrep
+        
       ];
       pathsToLink = [ "/bin" ];
     };
