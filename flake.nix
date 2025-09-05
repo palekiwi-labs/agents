@@ -41,6 +41,11 @@
             CONFIG_DIR="$HOME/.config/agent-opencode"
             mkdir -p "$CONFIG_DIR"
 
+            # Generate container name from parent and base directory
+            PARENT_DIR=$(basename "$(dirname "$PWD")")
+            BASE_DIR=$(basename "$PWD")
+            CONTAINER_NAME="''${PARENT_DIR}-''${BASE_DIR}"
+
             WORKSPACE="''${OPENCODE_WORKSPACE:-""}"
             PORT="$(${generate_port_from_path})"
 
@@ -76,6 +81,7 @@
               -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
               -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
               --workdir "/workspace/$(basename "$WORKSPACE")" \
+              --name "$CONTAINER_NAME" \
               "$IMAGE_NAME:latest" opencode "$@"
           '';
         };
