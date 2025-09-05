@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, pkgs-master }:
 
 let
   inherit (pkgs.dockerTools) buildImage streamLayeredImage;
@@ -46,7 +46,7 @@ rec {
 
     fromImage = base;
 
-    contents = [ pkgs.opencode ];
+    contents = [ pkgs-master.opencode ];
 
     config = {
       User = "agent";
