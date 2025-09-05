@@ -44,7 +44,7 @@
             # Generate container name from parent and base directory
             PARENT_DIR=$(basename "$(dirname "$PWD")")
             BASE_DIR=$(basename "$PWD")
-            CONTAINER_NAME="''${PARENT_DIR}-''${BASE_DIR}"
+            CONTAINER_NAME="opencode-''${PARENT_DIR}-''${BASE_DIR}"
 
             WORKSPACE="''${OPENCODE_WORKSPACE:-""}"
             PORT="$(${generate_port_from_path})"
