@@ -14,6 +14,7 @@ rec {
       paths = [
         bashInteractive
         coreutils
+        curl
         git
         gnugrep
         gnused
