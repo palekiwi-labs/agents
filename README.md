@@ -23,7 +23,7 @@ This project creates a secure, containerized environment for running OpenCode AI
 
 - Nix
 - Docker
-- `OPENCODE_WORKSPACE` environment variable (automatically set to current directory via `.envrc`)
+- `OPENCODE_WORKSPACE` environment variable set to your workspace directory
 
 ## Usage
 
