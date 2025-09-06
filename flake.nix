@@ -25,17 +25,18 @@
 
         opencodeImages = import ./opencode { inherit pkgs pkgs-master; };
 
-        opencodeWrapper = pkgs.writeShellApplication {
-          name = "opencode";
-          runtimeInputs = [ pkgs.docker ];
-          text = ''
-            IMAGE_NAME="agent-opencode"
+        mkOpencodeWrapper = { image, imageName, variant ? "" }:
+          pkgs.writeShellApplication {
+            name = "opencode${if variant != "" then "-${variant}" else ""}";
+            runtimeInputs = [ pkgs.docker ];
+            text = ''
+              IMAGE_NAME="${imageName}"
 
-            # Load image if not present
-            if ! docker image inspect "$IMAGE_NAME:latest" > /dev/null 2>&1; then
-              echo "Loading opencode Docker image..." >&2
-              ${opencodeImages.opencode} | docker load
-            fi
+              # Load image if not present
+              if ! docker image inspect "$IMAGE_NAME" > /dev/null 2>&1; then
+                echo "Loading opencode Docker image..." >&2
+                ${image} | docker load
+              fi
             
             # Create isolated config directory
             CONFIG_DIR="$HOME/.config/agent-opencode"
@@ -82,8 +83,19 @@
               -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
               --workdir "/workspace/$(basename "$WORKSPACE")" \
               --name "$CONTAINER_NAME" \
-              "$IMAGE_NAME:latest" opencode "$@"
-          '';
+              "$IMAGE_NAME" opencode "$@"
+            '';
+          };
+
+        opencodeWrapper = mkOpencodeWrapper {
+          image = opencodeImages.opencode;
+          imageName = "agent-opencode:latest";
+        };
+
+        opencodeRustWrapper = mkOpencodeWrapper {
+          image = opencodeImages.opencode-rust;
+          imageName = "agent-opencode:rust-latest";
+          variant = "rust";
         };
 
       in
@@ -92,13 +104,21 @@
           default = opencodeWrapper;
 
           opencode = opencodeWrapper;
+          opencode-rust = opencodeRustWrapper;
+          
           opencode-image = opencodeImages.opencode;
+          opencode-rust-image = opencodeImages.opencode-rust;
         };
 
         apps = rec {
           opencode = {
             type = "app";
             program = "${opencodeWrapper}/bin/opencode";
+          };
+
+          opencode-rust = {
+            type = "app";
+            program = "${opencodeRustWrapper}/bin/opencode-rust";
           };
 
           default = opencode;

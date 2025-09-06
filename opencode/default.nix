@@ -69,9 +69,9 @@ rec {
     name = "agent-opencode";
     tag = "rust-latest";
 
-    fromImage = opencode;
+    fromImage = base;
 
-    contents = [ pkgs.rust-analyzer ];
+    contents = [ pkgs-master.opencode pkgs.rust-analyzer ];
 
     config = agentConfig;
   };
