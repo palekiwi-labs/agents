@@ -5,6 +5,17 @@ let
 in
 
 rec {
+  agentConfig = {
+    User = "agent";
+    Cmd = [ "opencode" ];
+    WorkingDir = "/workspace";
+    Volumes = {
+      "/workspace" = { };
+      "/home/agent/.cache" = { };
+      "/home/agent/.local" = { };
+    };
+  };
+
   base = buildImage {
     name = "agent-base";
     tag = "latest";
@@ -51,16 +62,7 @@ rec {
 
     contents = [ pkgs-master.opencode ];
 
-    config = {
-      User = "agent";
-      Cmd = [ "opencode" ];
-      WorkingDir = "/workspace";
-      Volumes = {
-        "/workspace" = { };
-        "/home/agent/.cache" = { };
-        "/home/agent/.local" = { };
-      };
-    };
+    config = agentConfig;
   };
 
   opencode-rust = streamLayeredImage {
@@ -71,15 +73,6 @@ rec {
 
     contents = [ pkgs.rust-analyzer ];
 
-    config = {
-      User = "agent";
-      Cmd = [ "opencode" ];
-      WorkingDir = "/workspace";
-      Volumes = {
-        "/workspace" = { };
-        "/home/agent/.cache" = { };
-        "/home/agent/.local" = { };
-      };
-    };
+    config = agentConfig;
   };
 }
