@@ -21,7 +21,7 @@ rec {
         gnutar
         gzip
         ripgrep
-        
+
       ];
       pathsToLink = [ "/bin" ];
     };
@@ -50,6 +50,26 @@ rec {
     fromImage = base;
 
     contents = [ pkgs-master.opencode ];
+
+    config = {
+      User = "agent";
+      Cmd = [ "opencode" ];
+      WorkingDir = "/workspace";
+      Volumes = {
+        "/workspace" = { };
+        "/home/agent/.cache" = { };
+        "/home/agent/.local" = { };
+      };
+    };
+  };
+
+  opencode-rust = streamLayeredImage {
+    name = "agent-opencode";
+    tag = "rust-latest";
+
+    fromImage = opencode;
+
+    contents = [ pkgs.rust-analyzer ];
 
     config = {
       User = "agent";
