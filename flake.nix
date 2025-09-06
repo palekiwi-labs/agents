@@ -106,8 +106,8 @@
           opencode = opencodeWrapper;
           opencode-rust = opencodeRustWrapper;
           
-          opencode-image = opencodeImages.opencode;
-          opencode-rust-image = opencodeImages.opencode-rust;
+          opencode-image-script = opencodeImages.opencode;
+          opencode-rust-image-script = opencodeImages.opencode-rust;
         };
 
         apps = rec {
