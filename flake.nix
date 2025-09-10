@@ -25,65 +25,77 @@
 
         opencodeImages = import ./opencode { inherit pkgs pkgs-master; };
 
-        opencodeWrapper = pkgs.writeShellApplication {
-          name = "opencode";
-          runtimeInputs = [ pkgs.docker ];
-          text = ''
-            IMAGE_NAME="agent-opencode"
+        mkOpencodeWrapper = { image, imageName, variant ? "" }:
+          pkgs.writeShellApplication {
+            name = "opencode${if variant != "" then "-${variant}" else ""}";
+            runtimeInputs = [ pkgs.docker ];
+            text = ''
+              IMAGE_NAME="${imageName}"
 
-            # Load image if not present
-            if ! docker image inspect "$IMAGE_NAME:latest" > /dev/null 2>&1; then
-              echo "Loading opencode Docker image..." >&2
-              ${opencodeImages.opencode} | docker load
-            fi
+              # Load image if not present
+              if ! docker image inspect "$IMAGE_NAME" > /dev/null 2>&1; then
+                echo "Loading opencode Docker image..." >&2
+                ${image} | docker load
+              fi
             
-            # Create isolated config directory
-            CONFIG_DIR="$HOME/.config/agent-opencode"
-            mkdir -p "$CONFIG_DIR"
+              # Create isolated config directory
+              CONFIG_DIR="$HOME/.config/agent-opencode"
+              mkdir -p "$CONFIG_DIR"
 
-            # Generate container name from parent and base directory
-            PARENT_DIR=$(basename "$(dirname "$PWD")")
-            BASE_DIR=$(basename "$PWD")
-            CONTAINER_NAME="opencode-''${PARENT_DIR}-''${BASE_DIR}"
+              # Generate container name from parent and base directory
+              PARENT_DIR=$(basename "$(dirname "$PWD")")
+              BASE_DIR=$(basename "$PWD")
+              CONTAINER_NAME="opencode-''${PARENT_DIR}-''${BASE_DIR}"
 
-            WORKSPACE="''${OPENCODE_WORKSPACE:-""}"
-            PORT="$(${generate_port_from_path})"
+              WORKSPACE="''${OPENCODE_WORKSPACE:-""}"
+              PORT="$(${generate_port_from_path})"
 
-            if [[ -z "$WORKSPACE" ]]; then
-              echo "Error: OPENCODE_WORKSPACE environment variable is required" >&2
-              echo "Set it to the directory you want to mount as the workspace" >&2
-              exit 1
-            fi
+              if [[ -z "$WORKSPACE" ]]; then
+                echo "Error: OPENCODE_WORKSPACE environment variable is required" >&2
+                echo "Set it to the directory you want to mount as the workspace" >&2
+                exit 1
+              fi
 
-            if [[ ! -d "$WORKSPACE" ]]; then
-              echo "Error: OPENCODE_WORKSPACE '$WORKSPACE' is not a directory" >&2
-              exit 1
-            fi
+              if [[ ! -d "$WORKSPACE" ]]; then
+                echo "Error: OPENCODE_WORKSPACE '$WORKSPACE' is not a directory" >&2
+                exit 1
+              fi
 
-            WORKSPACE=$(realpath "$WORKSPACE")
+              WORKSPACE=$(realpath "$WORKSPACE")
             
-            exec docker run --rm -it \
-              --read-only \
-              --tmpfs /tmp:noexec,nosuid,size=100m \
-              --security-opt no-new-privileges \
-              --cap-drop ALL \
-              --network bridge \
-              --memory 512m \
-              --cpus 1.0 \
-              --pids-limit 100 \
-              -p "$PORT:80" \
-              -e USER="agent" \
-              -e TERM="xterm-256color" \
-              -e COLORTERM="truecolor" \
-              -e FORCE_COLOR=1 \
-              -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
-              -v "opencode-local-$PORT:/home/agent/.local:rw" \
-              -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
-              -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
-              --workdir "/workspace/$(basename "$WORKSPACE")" \
-              --name "$CONTAINER_NAME" \
-              "$IMAGE_NAME:latest" opencode "$@"
-          '';
+              exec docker run --rm -it \
+                --read-only \
+                --tmpfs /tmp:noexec,nosuid,size=100m \
+                --security-opt no-new-privileges \
+                --cap-drop ALL \
+                --network bridge \
+                --memory 512m \
+                --cpus 1.0 \
+                --pids-limit 100 \
+                -p "$PORT:80" \
+                -e USER="agent" \
+                -e TERM="xterm-256color" \
+                -e COLORTERM="truecolor" \
+                -e FORCE_COLOR=1 \
+                -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
+                -v "opencode-local-$PORT:/home/agent/.local:rw" \
+                -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
+                -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
+                --workdir "/workspace/$(basename "$WORKSPACE")" \
+                --name "$CONTAINER_NAME" \
+                "$IMAGE_NAME" opencode "$@"
+            '';
+          };
+
+        opencodeWrapper = mkOpencodeWrapper {
+          image = opencodeImages.opencode;
+          imageName = "agent-opencode:latest";
+        };
+
+        opencodeRustWrapper = mkOpencodeWrapper {
+          image = opencodeImages.opencode-rust;
+          imageName = "agent-opencode:rust-latest";
+          variant = "rust";
         };
 
       in
@@ -92,13 +104,21 @@
           default = opencodeWrapper;
 
           opencode = opencodeWrapper;
-          opencode-image = opencodeImages.opencode;
+          opencode-rust = opencodeRustWrapper;
+
+          opencode-image-script = opencodeImages.opencode;
+          opencode-rust-image-script = opencodeImages.opencode-rust;
         };
 
         apps = rec {
           opencode = {
             type = "app";
             program = "${opencodeWrapper}/bin/opencode";
+          };
+
+          opencode-rust = {
+            type = "app";
+            program = "${opencodeRustWrapper}/bin/opencode-rust";
           };
 
           default = opencode;
