@@ -3,15 +3,13 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-master.url = "github:NixOS/nixpkgs/master";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { nixpkgs, nixpkgs-master, flake-utils, ... }:
+  outputs = { nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        pkgs-master = nixpkgs-master.legacyPackages.${system};
 
         generate_port_from_path = pkgs.writeShellScript "generate_port_from_path" ''
           # Generate a deterministic port (32768-65535) based on directory path
@@ -23,7 +21,7 @@
           echo $((32768 + (port % 32768)))
         '';
 
-        opencodeImages = import ./opencode { inherit pkgs pkgs-master; };
+        opencodeImages = import ./opencode { inherit pkgs; };
 
         mkOpencodeWrapper = { image, imageName, variant ? "" }:
           pkgs.writeShellApplication {
