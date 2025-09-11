@@ -2,14 +2,16 @@
   description = "Secure Docker wrapper for OpenCode AI";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { nixpkgs, flake-utils, ... }:
+  outputs = { nixpkgs, nixpkgs-unstable, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
 
         generate_port_from_path = pkgs.writeShellScript "generate_port_from_path" ''
           # Generate a deterministic port (32768-65535) based on directory path
@@ -21,7 +23,7 @@
           echo $((32768 + (port % 32768)))
         '';
 
-        opencodeImages = import ./opencode { inherit pkgs; };
+        opencodeImages = import ./opencode { inherit pkgs pkgs-unstable; };
 
         mkOpencodeWrapper = { image, imageName, variant ? "" }:
           pkgs.writeShellApplication {

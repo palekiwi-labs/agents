@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, pkgs-unstable }:
 
 let
   inherit (pkgs.dockerTools) buildImage streamLayeredImage;
@@ -60,7 +60,7 @@ rec {
 
     fromImage = base;
 
-    contents = [ pkgs.opencode ];
+    contents = [ pkgs-unstable.opencode ];
 
     config = agentConfig;
   };
@@ -71,7 +71,7 @@ rec {
 
     fromImage = base;
 
-    contents = [ pkgs.opencode pkgs.rust-analyzer ];
+    contents = [ pkgs-unstable.opencode pkgs.rust-analyzer ];
 
     config = agentConfig;
   };
