@@ -26,13 +26,13 @@ rec {
         bashInteractive
         coreutils
         curl
+        fd
         git
         gnugrep
         gnused
         gnutar
         gzip
         ripgrep
-
       ];
       pathsToLink = [ "/bin" ];
     };
