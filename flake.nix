@@ -62,7 +62,6 @@
               WORKSPACE=$(realpath "$WORKSPACE")
             
               exec docker run --rm -it \
-                --read-only \
                 --tmpfs /tmp:noexec,nosuid,size=100m \
                 --security-opt no-new-privileges \
                 --cap-drop ALL \
