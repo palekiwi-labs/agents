@@ -24,6 +24,7 @@ rec {
       name = "image-root";
       paths = [
         bashInteractive
+        cacert
         coreutils
         curl
         fd
