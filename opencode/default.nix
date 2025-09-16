@@ -1,4 +1,4 @@
-{ pkgs, pkgs-unstable }:
+{ pkgs, pkgs-unstable, fenix-pkgs }:
 
 let
   inherit (pkgs.dockerTools) buildImage streamLayeredImage;
@@ -72,6 +72,27 @@ rec {
     fromImage = base;
 
     contents = [ pkgs-unstable.opencode pkgs.rust-analyzer ];
+
+    config = agentConfig;
+  };
+
+  opencode-rust-enhanced = streamLayeredImage {
+    name = "agent-opencode";
+    tag = "rust-enhanced-latest";
+
+    fromImage = base;
+
+    contents = [
+      pkgs-unstable.opencode
+      pkgs.rust-analyzer
+      (fenix-pkgs.withComponents [
+        "cargo"
+        "rustc" 
+        "rust-std"
+        "rustfmt"
+        "clippy"
+      ])
+    ];
 
     config = agentConfig;
   };

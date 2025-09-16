@@ -5,18 +5,23 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, flake-utils, ... }:
+  outputs = { nixpkgs, nixpkgs-unstable, flake-utils, fenix, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
         pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
+        fenix-pkgs = fenix.packages.${system}.stable;
 
         utils = import ./lib/utils.nix { inherit pkgs; };
         generate_port_from_path = utils.generate_port_from_path;
 
-        opencodeImages = import ./opencode { inherit pkgs pkgs-unstable; };
+        opencodeImages = import ./opencode { inherit pkgs pkgs-unstable fenix-pkgs; };
 
         mkOpencodeWrapper = { image, imageName, variant ? "" }:
           pkgs.writeShellApplication {
@@ -91,6 +96,12 @@
           variant = "rust";
         };
 
+        opencodeRustEnhancedWrapper = mkOpencodeWrapper {
+          image = opencodeImages.opencode-rust-enhanced;
+          imageName = "agent-opencode:rust-enhanced-latest";
+          variant = "rust-enhanced";
+        };
+
       in
       {
         packages = {
@@ -98,6 +109,7 @@
 
           opencode = opencodeWrapper;
           opencode-rust = opencodeRustWrapper;
+          opencode-rust-enhanced = opencodeRustEnhancedWrapper;
 
           opencode-image-script = opencodeImages.opencode;
           opencode-rust-image-script = opencodeImages.opencode-rust;
