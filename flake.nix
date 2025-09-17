@@ -63,7 +63,8 @@
             
               exec docker run --rm -it \
                 --read-only \
-                --tmpfs /tmp:exec,nosuid,size=500m \
+                --tmpfs /tmp:noexec,nosuid,size=500m \
+                --tmpfs /workspace/tmp:exec,nosuid,size=500m \
                 --tmpfs /home/agent/.cargo:noexec,nosuid,size=200m \
                 --security-opt no-new-privileges \
                 --cap-drop ALL \
@@ -76,6 +77,7 @@
                 -e TERM="xterm-256color" \
                 -e COLORTERM="truecolor" \
                 -e FORCE_COLOR=1 \
+                -e TMPDIR="/workspace/tmp" \
                 -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
                 -v "opencode-local-$PORT:/home/agent/.local:rw" \
                 -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
