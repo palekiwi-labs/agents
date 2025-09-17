@@ -64,6 +64,7 @@
               exec docker run --rm -it \
                 --read-only \
                 --tmpfs /tmp:exec,nosuid,size=500m \
+                --tmpfs /home/agent/.cargo:noexec,nosuid,size=200m \
                 --security-opt no-new-privileges \
                 --cap-drop ALL \
                 --network bridge \
