@@ -90,6 +90,7 @@ rec {
     contents = [
       pkgs-unstable.opencode
       pkgs.rust-analyzer
+      pkgs.gcc
       (fenix-pkgs.withComponents [
         "cargo"
         "rustc" 
