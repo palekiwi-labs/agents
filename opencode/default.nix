@@ -5,7 +5,7 @@ let
 in
 
 rec {
-  agentConfig = {
+  baseAgentConfig = {
     User = "agent";
     Cmd = [ "opencode" ];
     WorkingDir = "/workspace";
@@ -17,6 +17,12 @@ rec {
       "/workspace" = { };
       "/home/agent/.cache" = { };
       "/home/agent/.local" = { };
+    };
+  };
+
+  cargoAgentConfig = baseAgentConfig // {
+    Volumes = baseAgentConfig.Volumes // {
+      "/home/agent/.cargo" = { };
     };
   };
 
@@ -67,7 +73,7 @@ rec {
 
     contents = [ pkgs-unstable.opencode ];
 
-    config = agentConfig;
+    config = baseAgentConfig;
   };
 
   opencode-rust = streamLayeredImage {
@@ -78,7 +84,7 @@ rec {
 
     contents = [ pkgs-unstable.opencode pkgs.rust-analyzer ];
 
-    config = agentConfig;
+    config = baseAgentConfig;
   };
 
   opencode-rust-enhanced = streamLayeredImage {
@@ -100,6 +106,6 @@ rec {
       ])
     ];
 
-    config = agentConfig;
+    config = cargoAgentConfig;
   };
 }

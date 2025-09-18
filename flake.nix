@@ -23,7 +23,7 @@
 
         opencodeImages = import ./opencode { inherit pkgs pkgs-unstable fenix-pkgs; };
 
-        mkOpencodeWrapper = { image, imageName, variant ? "" }:
+        mkOpencodeWrapper = { image, imageName, variant ? "", cargoCache ? false }:
           pkgs.writeShellApplication {
             name = "opencode${if variant != "" then "-${variant}" else ""}";
             runtimeInputs = [ pkgs.docker ];
@@ -65,7 +65,10 @@
                 --read-only \
                 --tmpfs /tmp:noexec,nosuid,size=500m \
                 --tmpfs /workspace/tmp:exec,nosuid,size=500m \
-                --tmpfs /home/agent/.cargo:noexec,nosuid,size=200m \
+                ${if cargoCache then 
+                  ''-v "opencode-cargo-$PORT:/home/agent/.cargo:rw" \'' 
+                else 
+                  ''''} \
                 --security-opt no-new-privileges \
                 --cap-drop ALL \
                 --network bridge \
@@ -103,6 +106,7 @@
           image = opencodeImages.opencode-rust-enhanced;
           imageName = "agent-opencode:rust-enhanced-latest";
           variant = "rust-enhanced";
+          cargoCache = true;
         };
 
       in
