@@ -62,6 +62,9 @@ rec {
 
       mkdir /home/agent/.local
       chown agent:agent /home/agent/.local
+
+      mkdir /home/agent/.cargo
+      chown agent:agent /home/agent/.cargo
     '';
   };
 
