@@ -66,7 +66,7 @@
                 --tmpfs /tmp:noexec,nosuid,size=500m \
                 --tmpfs /workspace/tmp:exec,nosuid,size=500m \
                 ${if cargoCache then 
-                  ''-v "opencode-cargo-$PORT:/home/agent/.cargo:rw" \'' 
+                  ''-v "opencode-cargo-$PORT:/home/agent/.cargo:rw"''
                 else 
                   ''''} \
                 --security-opt no-new-privileges \
