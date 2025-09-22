@@ -1,18 +1,28 @@
-{ pkgs, pkgs-unstable }:
+{ pkgs, pkgs-unstable, fenix-pkgs }:
 
 let
   inherit (pkgs.dockerTools) buildImage streamLayeredImage;
 in
 
 rec {
-  agentConfig = {
+  baseAgentConfig = {
     User = "agent";
     Cmd = [ "opencode" ];
     WorkingDir = "/workspace";
+    Env = [
+      "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+      "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+    ];
     Volumes = {
       "/workspace" = { };
       "/home/agent/.cache" = { };
       "/home/agent/.local" = { };
+    };
+  };
+
+  cargoAgentConfig = baseAgentConfig // {
+    Volumes = baseAgentConfig.Volumes // {
+      "/home/agent/.cargo" = { };
     };
   };
 
@@ -24,6 +34,7 @@ rec {
       name = "image-root";
       paths = [
         bashInteractive
+        cacert
         coreutils
         curl
         fd
@@ -51,6 +62,9 @@ rec {
 
       mkdir /home/agent/.local
       chown agent:agent /home/agent/.local
+
+      mkdir /home/agent/.cargo
+      chown agent:agent /home/agent/.cargo
     '';
   };
 
@@ -62,7 +76,7 @@ rec {
 
     contents = [ pkgs-unstable.opencode ];
 
-    config = agentConfig;
+    config = baseAgentConfig;
   };
 
   opencode-rust = streamLayeredImage {
@@ -73,6 +87,28 @@ rec {
 
     contents = [ pkgs-unstable.opencode pkgs.rust-analyzer ];
 
-    config = agentConfig;
+    config = baseAgentConfig;
+  };
+
+  opencode-rust-enhanced = streamLayeredImage {
+    name = "agent-opencode";
+    tag = "rust-enhanced-latest";
+
+    fromImage = base;
+
+    contents = [
+      pkgs-unstable.opencode
+      pkgs.rust-analyzer
+      pkgs.gcc
+      (fenix-pkgs.withComponents [
+        "cargo"
+        "rustc" 
+        "rust-std"
+        "rustfmt"
+        "clippy"
+      ])
+    ];
+
+    config = cargoAgentConfig;
   };
 }

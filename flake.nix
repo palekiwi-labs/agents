@@ -5,20 +5,25 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, flake-utils, ... }:
+  outputs = { nixpkgs, nixpkgs-unstable, flake-utils, fenix, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
         pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
+        fenix-pkgs = fenix.packages.${system}.stable;
 
         utils = import ./lib/utils.nix { inherit pkgs; };
         generate_port_from_path = utils.generate_port_from_path;
 
-        opencodeImages = import ./opencode { inherit pkgs pkgs-unstable; };
+        opencodeImages = import ./opencode { inherit pkgs pkgs-unstable fenix-pkgs; };
 
-        mkOpencodeWrapper = { image, imageName, variant ? "" }:
+        mkOpencodeWrapper = { image, imageName, variant ? "", cargoCache ? false }:
           pkgs.writeShellApplication {
             name = "opencode${if variant != "" then "-${variant}" else ""}";
             runtimeInputs = [ pkgs.docker ];
@@ -58,7 +63,12 @@
             
               exec docker run --rm -it \
                 --read-only \
-                --tmpfs /tmp:noexec,nosuid,size=100m \
+                --tmpfs /tmp:noexec,nosuid,size=500m \
+                --tmpfs /workspace/tmp:exec,nosuid,size=500m \
+                ${if cargoCache then 
+                  ''-v "opencode-cargo-$PORT:/home/agent/.cargo:rw"''
+                else 
+                  ''''} \
                 --security-opt no-new-privileges \
                 --cap-drop ALL \
                 --network bridge \
@@ -70,6 +80,7 @@
                 -e TERM="xterm-256color" \
                 -e COLORTERM="truecolor" \
                 -e FORCE_COLOR=1 \
+                -e TMPDIR="/workspace/tmp" \
                 -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
                 -v "opencode-local-$PORT:/home/agent/.local:rw" \
                 -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
@@ -91,6 +102,13 @@
           variant = "rust";
         };
 
+        opencodeRustEnhancedWrapper = mkOpencodeWrapper {
+          image = opencodeImages.opencode-rust-enhanced;
+          imageName = "agent-opencode:rust-enhanced-latest";
+          variant = "rust-enhanced";
+          cargoCache = true;
+        };
+
       in
       {
         packages = {
@@ -98,6 +116,7 @@
 
           opencode = opencodeWrapper;
           opencode-rust = opencodeRustWrapper;
+          opencode-rust-enhanced = opencodeRustEnhancedWrapper;
 
           opencode-image-script = opencodeImages.opencode;
           opencode-rust-image-script = opencodeImages.opencode-rust;
