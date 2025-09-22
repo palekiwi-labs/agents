@@ -111,4 +111,15 @@ rec {
 
     config = cargoAgentConfig;
   };
+
+  gemini-cli = streamLayeredImage {
+    name = "agent-gemini-cli";
+    tag = "latest";
+
+    fromImage = base;
+
+    contents = [ pkgs-unstable.gemini-cli ];
+
+    config = baseAgentConfig;
+  };
 }
