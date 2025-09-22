@@ -114,7 +114,6 @@
               CONTAINER_NAME="gemini-cli-''${PARENT_DIR}-''${BASE_DIR}"
 
               WORKSPACE="''${GEMINI_WORKSPACE:-""}"
-              PORT="$(${generate_port_from_path})"
 
               if [[ -z "$WORKSPACE" ]]; then
                 echo "Error: GEMINI_WORKSPACE environment variable is required" >&2
@@ -139,7 +138,6 @@
                 --memory 1024m \
                 --cpus 1.0 \
                 --pids-limit 100 \
-                -p "$PORT:80" \
                 -e USER="agent" \
                 -e TERM="xterm-256color" \
                 -e COLORTERM="truecolor" \
