@@ -72,7 +72,7 @@
                 --security-opt no-new-privileges \
                 --cap-drop ALL \
                 --network bridge \
-                --memory 512m \
+                --memory 1024m \
                 --cpus 1.0 \
                 --pids-limit 100 \
                 -p "$PORT:80" \
