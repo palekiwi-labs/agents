@@ -38,7 +38,7 @@ rec {
         coreutils
         curl
         fd
-        find
+        findutils
         git
         gnugrep
         gnused
