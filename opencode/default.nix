@@ -119,7 +119,7 @@ rec {
 
     fromImage = base;
 
-    contents = [ pkgs-unstable.gemini-cli ];
+    contents = [ pkgs-unstable.gemini-cli-bin ];
 
     config = baseAgentConfig;
   };
