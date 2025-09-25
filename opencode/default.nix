@@ -103,7 +103,7 @@ rec {
       pkgs.gcc
       (fenix-pkgs.withComponents [
         "cargo"
-        "rustc" 
+        "rustc"
         "rust-std"
         "rustfmt"
         "clippy"
@@ -113,14 +113,18 @@ rec {
     config = cargoAgentConfig;
   };
 
-  gemini-cli = streamLayeredImage {
-    name = "agent-gemini-cli";
-    tag = "latest";
+  gemini-cli =
+    let
+      gemini-cli-pkg = pkgs.callPackage ../pkgs/gemini-cli-bin.nix { };
+    in
+    streamLayeredImage {
+      name = "agent-gemini-cli";
+      tag = gemini-cli-pkg.version;
 
-    fromImage = base;
+      fromImage = base;
 
-    contents = [ (pkgs.callPackage ../pkgs/gemini-cli-bin.nix {}) ];
+      contents = [ gemini-cli-pkg ];
 
-    config = baseAgentConfig;
-  };
+      config = baseAgentConfig;
+    };
 }

@@ -173,7 +173,7 @@
 
         geminiCliWrapper = mkGeminiCliWrapper {
           image = opencodeImages.gemini-cli;
-          imageName = "agent-gemini-cli:latest";
+          imageName = "agent-gemini-cli:${(pkgs.callPackage ./pkgs/gemini-cli-bin.nix {}).version}";
         };
 
       in
