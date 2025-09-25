@@ -86,17 +86,6 @@ rec {
 
     fromImage = base;
 
-    contents = [ pkgs-unstable.opencode pkgs.rust-analyzer ];
-
-    config = baseAgentConfig;
-  };
-
-  opencode-rust-enhanced = streamLayeredImage {
-    name = "agent-opencode";
-    tag = "rust-enhanced-latest";
-
-    fromImage = base;
-
     contents = [
       pkgs-unstable.opencode
       pkgs.rust-analyzer
