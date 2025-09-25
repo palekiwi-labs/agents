@@ -38,6 +38,7 @@ rec {
         coreutils
         curl
         fd
+        findutils
         git
         gnugrep
         gnused
@@ -102,7 +103,7 @@ rec {
       pkgs.gcc
       (fenix-pkgs.withComponents [
         "cargo"
-        "rustc" 
+        "rustc"
         "rust-std"
         "rustfmt"
         "clippy"
@@ -111,4 +112,19 @@ rec {
 
     config = cargoAgentConfig;
   };
+
+  gemini-cli =
+    let
+      gemini-cli-pkg = pkgs.callPackage ../pkgs/gemini-cli-bin.nix { };
+    in
+    streamLayeredImage {
+      name = "agent-gemini-cli";
+      tag = gemini-cli-pkg.version;
+
+      fromImage = base;
+
+      contents = [ gemini-cli-pkg ];
+
+      config = baseAgentConfig;
+    };
 }
