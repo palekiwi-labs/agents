@@ -53,20 +53,6 @@
           opencode-image-script = opencodeImages.opencode;
           opencode-rust-image-script = opencodeImages.opencode-rust;
         };
-
-        apps = rec {
-          opencode = {
-            type = "app";
-            program = "${opencodeWrapper}/bin/opencode";
-          };
-
-          opencode-rust = {
-            type = "app";
-            program = "${opencodeRustWrapper}/bin/opencode-rust";
-          };
-
-          default = opencode;
-        };
       }
     );
 }
