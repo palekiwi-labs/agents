@@ -21,7 +21,7 @@
         utils = import ./lib/utils.nix { inherit pkgs; };
         generate_port_from_path = utils.generate_port_from_path;
 
-        opencodeImages = import ./opencode { inherit pkgs pkgs-unstable fenix-pkgs; };
+        opencodeImages = import ./images { inherit pkgs pkgs-unstable fenix-pkgs; };
 
         mkOpencodeWrapper = { image, imageName, variant ? "", cargoCache ? false }:
           pkgs.writeShellApplication {
