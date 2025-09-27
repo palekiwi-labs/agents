@@ -88,11 +88,12 @@ rec {
 
     contents = [
       pkgs-unstable.opencode
-      pkgs.rust-analyzer
       pkgs.gcc
       (fenix-pkgs.withComponents [
         "cargo"
         "rustc"
+        "rust-analyzer"
+        "rust-src"
         "rust-std"
         "rustfmt"
         "clippy"
