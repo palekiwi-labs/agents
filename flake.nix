@@ -38,7 +38,7 @@
 
         opencodeRustWrapper = mkOpencodeWrapper {
           image = opencodeImages.opencode-rust;
-          imageName = "agent-opencode:rust-latest";
+          imageName = "agent-opencode:${pkgs-unstable.opencode.version}-rust";
           variant = "rust";
           cargoCache = true;
         };

@@ -93,7 +93,7 @@ rec {
 
   opencode-rust = streamLayeredImage {
     name = "agent-opencode";
-    tag = "rust-latest";
+    tag = "${opencode-pkg.version}-rust";
 
     fromImage = base;
 
