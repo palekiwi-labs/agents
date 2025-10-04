@@ -133,9 +133,6 @@ rec {
       
       contents = [
         opencode-pkg
-        pkgs.gcc
-        pkgs.gnumake
-        pkgs.pkg-config
         rubyPkg
         gems
       ];
