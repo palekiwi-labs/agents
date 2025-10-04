@@ -78,16 +78,20 @@ rec {
     '';
   };
 
-  opencode = streamLayeredImage {
-    name = "agent-opencode";
-    tag = "latest";
+  opencode = 
+    let
+      opencode-pkg = pkgs-unstable.opencode;
+    in
+    streamLayeredImage {
+      name = "agent-opencode";
+      tag = opencode-pkg.version;
 
-    fromImage = base;
+      fromImage = base;
 
-    contents = [ pkgs-unstable.opencode ];
+      contents = [ opencode-pkg ];
 
-    config = baseAgentConfig;
-  };
+      config = baseAgentConfig;
+    };
 
   opencode-rust = streamLayeredImage {
     name = "agent-opencode";

@@ -33,7 +33,7 @@
 
         opencodeWrapper = mkOpencodeWrapper {
           image = opencodeImages.opencode;
-          imageName = "agent-opencode:latest";
+          imageName = "agent-opencode:${pkgs-unstable.opencode.version}";
         };
 
         opencodeRustWrapper = mkOpencodeWrapper {
