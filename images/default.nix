@@ -2,6 +2,7 @@
 
 let
   inherit (pkgs.dockerTools) buildImage streamLayeredImage;
+  opencode-pkg = pkgs-unstable.opencode;
 in
 
 rec {
@@ -23,6 +24,12 @@ rec {
   cargoAgentConfig = baseAgentConfig // {
     Volumes = baseAgentConfig.Volumes // {
       "/home/agent/.cargo" = { };
+    };
+  };
+
+  rubyAgentConfig = baseAgentConfig // {
+    Volumes = baseAgentConfig.Volumes // {
+      "/home/agent/.bundle" = { };
     };
   };
 
@@ -66,28 +73,32 @@ rec {
 
       mkdir /home/agent/.cargo
       chown agent:agent /home/agent/.cargo
+
+      mkdir /home/agent/.bundle
+      chown agent:agent /home/agent/.bundle
     '';
   };
 
-  opencode = streamLayeredImage {
-    name = "agent-opencode";
-    tag = "latest";
+  opencode = 
+    streamLayeredImage {
+      name = "agent-opencode";
+      tag = opencode-pkg.version;
 
-    fromImage = base;
+      fromImage = base;
 
-    contents = [ pkgs-unstable.opencode ];
+      contents = [ opencode-pkg ];
 
-    config = baseAgentConfig;
-  };
+      config = baseAgentConfig;
+    };
 
   opencode-rust = streamLayeredImage {
     name = "agent-opencode";
-    tag = "rust-latest";
+    tag = "${opencode-pkg.version}-rust";
 
     fromImage = base;
 
     contents = [
-      pkgs-unstable.opencode
+      opencode-pkg
       pkgs.gcc
       (fenix-pkgs.withComponents [
         "cargo"
@@ -102,6 +113,32 @@ rec {
 
     config = cargoAgentConfig;
   };
+
+  opencode-ruby = 
+    let
+      rubyVersion = pkgs.lib.fileContents ./ruby/.ruby-version;
+      rubyPkg = pkgs."ruby-${rubyVersion}";
+      
+      gems = pkgs.bundlerEnv {
+        name = "opencode-ruby-gems";
+        ruby = rubyPkg;
+        gemdir = ./ruby;
+      };
+    in
+    streamLayeredImage {
+      name = "agent-opencode";
+      tag = "${opencode-pkg.version}-ruby";
+      
+      fromImage = base;
+      
+      contents = [
+        opencode-pkg
+        rubyPkg
+        gems
+      ];
+      
+      config = rubyAgentConfig;
+    };
 
   gemini-cli =
     let
