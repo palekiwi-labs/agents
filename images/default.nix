@@ -26,6 +26,12 @@ rec {
     };
   };
 
+  rubyAgentConfig = baseAgentConfig // {
+    Volumes = baseAgentConfig.Volumes // {
+      "/home/agent/.bundle" = { };
+    };
+  };
+
   base = buildImage {
     name = "agent-base";
     tag = "latest";
@@ -66,6 +72,9 @@ rec {
 
       mkdir /home/agent/.cargo
       chown agent:agent /home/agent/.cargo
+
+      mkdir /home/agent/.bundle
+      chown agent:agent /home/agent/.bundle
     '';
   };
 
@@ -102,6 +111,35 @@ rec {
 
     config = cargoAgentConfig;
   };
+
+  opencode-ruby = 
+    let
+      rubyVersion = pkgs.lib.fileContents ./ruby/.ruby-version;
+      rubyPkg = pkgs."ruby-${rubyVersion}";
+      
+      gems = pkgs.bundlerEnv {
+        name = "opencode-ruby-gems";
+        ruby = rubyPkg;
+        gemdir = ./ruby;
+      };
+    in
+    streamLayeredImage {
+      name = "agent-opencode";
+      tag = "ruby-${rubyVersion}";
+      
+      fromImage = base;
+      
+      contents = [
+        pkgs-unstable.opencode
+        pkgs.gcc
+        pkgs.gnumake
+        pkgs.pkg-config
+        rubyPkg
+        gems
+      ];
+      
+      config = rubyAgentConfig;
+    };
 
   gemini-cli =
     let
