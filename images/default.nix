@@ -127,7 +127,7 @@ rec {
     in
     streamLayeredImage {
       name = "agent-opencode";
-      tag = "ruby-${rubyVersion}";
+      tag = "${opencode-pkg.version}-ruby";
       
       fromImage = base;
       

@@ -47,7 +47,7 @@
         
         opencodeRubyWrapper = mkOpencodeWrapper {
           image = opencodeImages.opencode-ruby;
-          imageName = "agent-opencode:ruby-${rubyVersion}";
+          imageName = "agent-opencode:${pkgs-unstable.opencode.version}-ruby";
           variant = "ruby";
         };
 
