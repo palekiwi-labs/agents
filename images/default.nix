@@ -2,6 +2,7 @@
 
 let
   inherit (pkgs.dockerTools) buildImage streamLayeredImage;
+  opencode-pkg = pkgs-unstable.opencode;
 in
 
 rec {
@@ -79,9 +80,6 @@ rec {
   };
 
   opencode = 
-    let
-      opencode-pkg = pkgs-unstable.opencode;
-    in
     streamLayeredImage {
       name = "agent-opencode";
       tag = opencode-pkg.version;
@@ -100,7 +98,7 @@ rec {
     fromImage = base;
 
     contents = [
-      pkgs-unstable.opencode
+      opencode-pkg
       pkgs.gcc
       (fenix-pkgs.withComponents [
         "cargo"
@@ -134,7 +132,7 @@ rec {
       fromImage = base;
       
       contents = [
-        pkgs-unstable.opencode
+        opencode-pkg
         pkgs.gcc
         pkgs.gnumake
         pkgs.pkg-config
