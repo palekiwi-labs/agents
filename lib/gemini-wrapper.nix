@@ -2,7 +2,7 @@
 
 { image, imageName, variant ? "" }:
 pkgs.writeShellApplication {
-  name = "gemini-cli${if variant != "" then "-${variant}" else ""}";
+  name = "gemini${if variant != "" then "-${variant}" else ""}";
   runtimeInputs = [ pkgs.docker ];
   text = ''
     IMAGE_NAME="${imageName}"
