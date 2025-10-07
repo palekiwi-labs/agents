@@ -43,8 +43,6 @@
           cargoCache = true;
         };
 
-        rubyVersion = pkgs.lib.fileContents ./images/ruby/.ruby-version;
-        
         opencodeRubyWrapper = mkOpencodeWrapper {
           image = opencodeImages.opencode-ruby;
           imageName = "agent-opencode:${pkgs-unstable.opencode.version}-ruby";
