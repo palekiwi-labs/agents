@@ -29,7 +29,7 @@
         };
 
         mkOpencodeWrapper = import ./lib/opencode-wrapper.nix { inherit pkgs; };
-        mkGeminiCliWrapper = import ./lib/gemini-cli-wrapper.nix { inherit pkgs; };
+        mkGeminiWrapper = import ./lib/gemini-wrapper.nix { inherit pkgs; };
 
         opencodeWrapper = mkOpencodeWrapper {
           image = opencodeImages.opencode;
@@ -49,8 +49,8 @@
           variant = "ruby";
         };
 
-        geminiCliWrapper = mkGeminiCliWrapper {
-          image = opencodeImages.gemini-cli;
+        geminiWrapper = mkGeminiWrapper {
+          image = opencodeImages.gemini;
           imageName = "agent-gemini-cli:${(pkgs.callPackage ./pkgs/gemini-cli-bin.nix {}).version}";
         };
 
@@ -63,7 +63,7 @@
           opencode-rust = opencodeRustWrapper;
           opencode-ruby = opencodeRubyWrapper;
 
-          gemini-cli = geminiCliWrapper;
+          gemini = geminiWrapper;
 
           opencode-image-script = opencodeImages.opencode;
           opencode-rust-image-script = opencodeImages.opencode-rust;
