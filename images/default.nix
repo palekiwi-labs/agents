@@ -140,7 +140,7 @@ rec {
       config = rubyAgentConfig;
     };
 
-  gemini-cli =
+  gemini =
     let
       gemini-cli-pkg = pkgs.callPackage ../pkgs/gemini-cli-bin.nix { };
     in
