@@ -76,6 +76,9 @@ rec {
 
       mkdir /home/agent/.bundle
       chown agent:agent /home/agent/.bundle
+
+      mkdir -p /usr/bin
+      ln -s ${pkgs.coreutils}/bin/env /usr/bin/env
     '';
   };
 
