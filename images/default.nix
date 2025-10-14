@@ -51,6 +51,7 @@ rec {
         gnused
         gnutar
         gzip
+        jq
         ripgrep
       ];
       pathsToLink = [ "/bin" ];
