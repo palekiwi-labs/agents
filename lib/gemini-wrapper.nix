@@ -36,6 +36,16 @@ pkgs.writeShellApplication {
     fi
 
     WORKSPACE=$(realpath "$WORKSPACE")
+
+    SHADOW_MOUNTS=()
+    if [[ -n "''${AGENTS_FORBIDDEN:-}" ]]; then
+      IFS=':' read -ra PATHS <<< "$AGENTS_FORBIDDEN"
+      for path in "''${PATHS[@]}"; do
+        if [[ -n "$path" ]]; then
+          SHADOW_MOUNTS+=(-v "/dev/null:/workspace/$(basename "$WORKSPACE")/$path":ro)
+        fi
+      done
+    fi
   
     exec docker run --rm -it \
       --read-only \
@@ -54,8 +64,7 @@ pkgs.writeShellApplication {
       -e TMPDIR="/workspace/tmp" \
       -v "$CONFIG_DIR:/home/agent/.gemini" \
       -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
-      -v /dev/null:/workspace/config/cloudinary.yml:ro \
-      -v /dev/null:/workspace/config/secrets.yml:ro \
+      "''${SHADOW_MOUNTS[@]}" \
       --workdir "/workspace/$(basename "$WORKSPACE")" \
       --name "$CONTAINER_NAME" \
       "$IMAGE_NAME" gemini "$@"
