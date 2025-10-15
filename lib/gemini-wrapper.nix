@@ -44,7 +44,7 @@ pkgs.writeShellApplication {
         if [[ -n "$path" ]]; then
           FULL_PATH="$WORKSPACE/$path"
           if [[ -d "$FULL_PATH" ]]; then
-            SHADOW_MOUNTS+=(--tmpfs "/workspace/$(basename "$WORKSPACE")/$path:ro,noexec,nosuid,size=1k")
+            SHADOW_MOUNTS+=(--tmpfs "/workspace/$(basename "$WORKSPACE")/$path:ro,noexec,nosuid,size=1k,mode=000")
           elif [[ -f "$FULL_PATH" ]]; then
             SHADOW_MOUNTS+=(-v "/dev/null:/workspace/$(basename "$WORKSPACE")/$path:ro")
           fi
