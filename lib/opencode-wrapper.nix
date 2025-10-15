@@ -41,6 +41,16 @@ pkgs.writeShellApplication {
     fi
 
     WORKSPACE=$(realpath "$WORKSPACE")
+
+    SHADOW_MOUNTS=()
+    if [[ -n "''${AGENTS_FORBIDDEN:-}" ]]; then
+      IFS=':' read -ra PATHS <<< "$AGENTS_FORBIDDEN"
+      for path in "''${PATHS[@]}"; do
+        if [[ -n "$path" ]]; then
+          SHADOW_MOUNTS+=(-v "/dev/null:/workspace/$(basename "$WORKSPACE")/$path":ro)
+        fi
+      done
+    fi
   
     exec docker run --rm -it \
       --read-only \
@@ -68,6 +78,7 @@ pkgs.writeShellApplication {
       -v "opencode-local-$PORT:/home/agent/.local:rw" \
       -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
       -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
+      "''${SHADOW_MOUNTS[@]}" \
       --workdir "/workspace/$(basename "$WORKSPACE")" \
       --name "$CONTAINER_NAME" \
       "$IMAGE_NAME" opencode "$@"
