@@ -42,7 +42,12 @@ pkgs.writeShellApplication {
       IFS=':' read -ra PATHS <<< "$AGENTS_FORBIDDEN"
       for path in "''${PATHS[@]}"; do
         if [[ -n "$path" ]]; then
-          SHADOW_MOUNTS+=(-v "/dev/null:/workspace/$(basename "$WORKSPACE")/$path":ro)
+          FULL_PATH="$WORKSPACE/$path"
+          if [[ -d "$FULL_PATH" ]]; then
+            SHADOW_MOUNTS+=(--tmpfs "/workspace/$(basename "$WORKSPACE")/$path:ro,noexec,nosuid,size=1k")
+          elif [[ -f "$FULL_PATH" ]]; then
+            SHADOW_MOUNTS+=(-v "/dev/null:/workspace/$(basename "$WORKSPACE")/$path:ro")
+          fi
         fi
       done
     fi
