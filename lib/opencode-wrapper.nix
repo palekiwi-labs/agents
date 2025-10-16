@@ -18,19 +18,19 @@ pkgs.writeShellApplication {
     fi
   
     # Create isolated config directory
-    CONFIG_DIR="$HOME/.config/agent-opencode"
+    CONFIG_DIR="''${OPENCODE_CONFIG_DIR:-$HOME/.config/agent-opencode}"
     mkdir -p "$CONFIG_DIR"
 
     # Generate container name from parent and base directory
     PARENT_DIR=$(basename "$(dirname "$PWD")")
     BASE_DIR=$(basename "$PWD")
-    CONTAINER_NAME="opencode-''${PARENT_DIR}-''${BASE_DIR}"
+    CONTAINER_NAME="''${OPENCODE_CONTAINER_NAME:-opencode-''${PARENT_DIR}-''${BASE_DIR}}"
 
-    WORKSPACE="''${OPENCODE_WORKSPACE:-""}"
-    PORT="$(${generate_port_from_path})"
+    WORKSPACE="''${OPENCODE_WORKSPACE:-''${AGENTS_WORKSPACE:-}}"
+    PORT="''${OPENCODE_PORT:-$(${generate_port_from_path})}"
 
     if [[ -z "$WORKSPACE" ]]; then
-      echo "Error: OPENCODE_WORKSPACE environment variable is required" >&2
+      echo "Error: OPENCODE_WORKSPACE or AGENTS_WORKSPACE environment variable is required" >&2
       echo "Set it to the directory you want to mount as the workspace" >&2
       exit 1
     fi
@@ -67,10 +67,10 @@ pkgs.writeShellApplication {
         ''''} \
       --security-opt no-new-privileges \
       --cap-drop ALL \
-      --network bridge \
-      --memory 1024m \
-      --cpus 1.0 \
-      --pids-limit 100 \
+      --network "''${OPENCODE_NETWORK:-bridge}" \
+      --memory "''${OPENCODE_MEMORY:-1024m}" \
+      --cpus "''${OPENCODE_CPUS:-1.0}" \
+      --pids-limit "''${OPENCODE_PIDS_LIMIT:-100}" \
       -p "$PORT:80" \
       -e USER="agent" \
       -e TERM="xterm-256color" \

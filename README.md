@@ -23,7 +23,7 @@ This project creates a secure, containerized environment for running OpenCode AI
 
 - Nix
 - Docker
-- `OPENCODE_WORKSPACE` environment variable set to your workspace directory
+- `OPENCODE_WORKSPACE` or `AGENTS_WORKSPACE` environment variable set to your workspace directory
 
 ## Usage
 
@@ -32,6 +32,8 @@ This project creates a secure, containerized environment for running OpenCode AI
 1. Set your workspace directory:
 ```bash
 export OPENCODE_WORKSPACE=/path/to/your/workspace
+# Or use the shared workspace variable
+export AGENTS_WORKSPACE=/path/to/your/workspace
 ```
 
 2. Run OpenCode:
@@ -43,6 +45,33 @@ Or using the specific app:
 ```bash
 nix run .#opencode
 ```
+
+### Environment Variables
+
+#### Workspace Configuration
+- `AGENTS_WORKSPACE` - Shared workspace directory for all agents (fallback for both OpenCode and Gemini)
+- `OPENCODE_WORKSPACE` - OpenCode-specific workspace directory (overrides `AGENTS_WORKSPACE`)
+- `GEMINI_WORKSPACE` - Gemini-specific workspace directory (overrides `AGENTS_WORKSPACE`)
+
+#### OpenCode Configuration
+- `OPENCODE_CONTAINER_NAME` - Container name (default: `opencode-{parent-dir}-{current-dir}`)
+- `OPENCODE_PORT` - Port mapping (default: deterministically generated from path, 32768-65535)
+- `OPENCODE_CONFIG_DIR` - Configuration directory (default: `$HOME/.config/agent-opencode`)
+- `OPENCODE_NETWORK` - Docker network mode (default: `bridge`)
+- `OPENCODE_MEMORY` - Memory limit (default: `1024m`)
+- `OPENCODE_CPUS` - CPU limit (default: `1.0`)
+- `OPENCODE_PIDS_LIMIT` - Process limit (default: `100`)
+
+#### Gemini Configuration
+- `GEMINI_CONTAINER_NAME` - Container name (default: `gemini-cli-{parent-dir}-{current-dir}`)
+- `GEMINI_CONFIG_DIR` - Configuration directory (default: `$HOME/.config/agent-gemini-cli`)
+- `GEMINI_NETWORK` - Docker network mode (default: `bridge`)
+- `GEMINI_MEMORY` - Memory limit (default: `1024m`)
+- `GEMINI_CPUS` - CPU limit (default: `1.0`)
+- `GEMINI_PIDS_LIMIT` - Process limit (default: `100`)
+
+#### Security Configuration
+- `AGENTS_FORBIDDEN` - Colon-separated list of paths to shadow mount (block access to specific files/directories within workspace)
 
 ### Variants
 
