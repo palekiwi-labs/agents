@@ -14,18 +14,18 @@ pkgs.writeShellApplication {
     fi
   
     # Create isolated config directory
-    CONFIG_DIR="$HOME/.config/agent-gemini-cli"
+    CONFIG_DIR="''${GEMINI_CONFIG_DIR:-$HOME/.config/agent-gemini-cli}"
     mkdir -p "$CONFIG_DIR"
 
     # Generate container name from parent and base directory
     PARENT_DIR=$(basename "$(dirname "$PWD")")
     BASE_DIR=$(basename "$PWD")
-    CONTAINER_NAME="gemini-cli-''${PARENT_DIR}-''${BASE_DIR}"
+    CONTAINER_NAME="''${GEMINI_CONTAINER_NAME:-gemini-cli-''${PARENT_DIR}-''${BASE_DIR}}"
 
-    WORKSPACE="''${GEMINI_WORKSPACE:-""}"
+    WORKSPACE="''${GEMINI_WORKSPACE:-''${AGENTS_WORKSPACE:-}}"
 
     if [[ -z "$WORKSPACE" ]]; then
-      echo "Error: GEMINI_WORKSPACE environment variable is required" >&2
+      echo "Error: GEMINI_WORKSPACE or AGENTS_WORKSPACE environment variable is required" >&2
       echo "Set it to the directory you want to mount as the workspace" >&2
       exit 1
     fi
@@ -58,10 +58,10 @@ pkgs.writeShellApplication {
       --tmpfs /workspace/tmp:exec,nosuid,size=500m \
       --security-opt no-new-privileges \
       --cap-drop ALL \
-      --network bridge \
-      --memory 1024m \
-      --cpus 1.0 \
-      --pids-limit 100 \
+      --network "''${GEMINI_NETWORK:-bridge}" \
+      --memory "''${GEMINI_MEMORY:-1024m}" \
+      --cpus "''${GEMINI_CPUS:-1.0}" \
+      --pids-limit "''${GEMINI_PIDS_LIMIT:-100}" \
       -e USER="agent" \
       -e TERM="xterm-256color" \
       -e COLORTERM="truecolor" \
