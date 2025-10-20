@@ -78,6 +78,7 @@ pkgs.writeShellApplication {
       -e FORCE_COLOR=1 \
       -e ZAI_CODING_PLAN_API_KEY="$(cat /run/secrets/zai_coding_plan/api_key)" \
       -e OPENCODE_API_KEY="$(cat /run/secrets/opencode/api_key)" \
+      -e CONTEXT7_API_KEY="$(cat /run/secrets/context7/api_key)" \
       -e TMPDIR="/workspace/tmp" \
       -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
       -v "opencode-local-$PORT:/home/agent/.local:rw" \
