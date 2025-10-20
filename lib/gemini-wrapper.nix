@@ -67,6 +67,7 @@ pkgs.writeShellApplication {
       -e COLORTERM="truecolor" \
       -e FORCE_COLOR=1 \
       -e TMPDIR="/workspace/tmp" \
+      -e CONTEXT7_API_KEY="$(cat /run/secrets/context7/api_key)" \
       -v "$CONFIG_DIR:/home/agent/.gemini" \
       -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
       "''${SHADOW_MOUNTS[@]}" \
