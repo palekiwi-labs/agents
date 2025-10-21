@@ -70,6 +70,8 @@ pkgs.writeShellApplication {
       -e CONTEXT7_API_KEY="$(cat /run/secrets/context7/api_key)" \
       -v "$CONFIG_DIR:/home/agent/.gemini" \
       -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
+      -v /etc/localtime:/etc/localtime:ro \
+      -v /etc/timezone:/etc/timezone:ro \
       "''${SHADOW_MOUNTS[@]}" \
       --workdir "/workspace/$(basename "$WORKSPACE")" \
       --name "$CONTAINER_NAME" \
