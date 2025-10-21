@@ -84,6 +84,8 @@ pkgs.writeShellApplication {
       -v "opencode-local-$PORT:/home/agent/.local:rw" \
       -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
       -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
+      -v /etc/localtime:/etc/localtime:ro \
+      -v /etc/timezone:/etc/timezone:ro \
       "''${SHADOW_MOUNTS[@]}" \
       --workdir "/workspace/$(basename "$WORKSPACE")" \
       --name "$CONTAINER_NAME" \
