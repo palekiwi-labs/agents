@@ -2,11 +2,11 @@
 
 stdenvNoCC.mkDerivation rec {
   pname = "gemini-cli-bin";
-  version = "0.9.0";
+  version = "0.10.0";
 
   src = fetchurl {
     url = "https://github.com/google-gemini/gemini-cli/releases/download/v${version}/gemini.js";
-    hash = "sha256-nUuO+03WqWjW8GGQNyVBdDSVEKNBDDsDta7MP6YzcX8=";
+    hash = "sha256-jwyx5HWjPi2S5GQFxV+VeuwrmjmLi+F1nzw4YMfNSiA=";
   };
 
   phases = [ "installPhase" "fixupPhase" ];
