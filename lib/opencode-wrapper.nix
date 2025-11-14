@@ -76,10 +76,11 @@ pkgs.writeShellApplication {
       -e TERM="xterm-256color" \
       -e COLORTERM="truecolor" \
       -e FORCE_COLOR=1 \
-      -e ZAI_CODING_PLAN_API_KEY="$(cat /run/secrets/zai_coding_plan/api_key)" \
-      -e OPENCODE_API_KEY="$(cat /run/secrets/opencode/api_key)" \
       -e CONTEXT7_API_KEY="$(cat /run/secrets/context7/api_key)" \
       -e GEMINI_API_KEY="$(cat /run/secrets/ygt/gemini/api_key)" \
+      -e OPENCODE_API_KEY="$(cat /run/secrets/opencode/api_key)" \
+      -e OPENCODE_ENABLE_EXPERIMENTAL_MODELS="''${OPENCODE_ENABLE_EXPERIMENTAL_MODELS:-false}" \
+      -e ZAI_CODING_PLAN_API_KEY="$(cat /run/secrets/zai_coding_plan/api_key)" \
       -e TMPDIR="/workspace/tmp" \
       -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
       -v "opencode-local-$PORT:/home/agent/.local:rw" \
