@@ -76,11 +76,11 @@ pkgs.writeShellApplication {
       -e TERM="xterm-256color" \
       -e COLORTERM="truecolor" \
       -e FORCE_COLOR=1 \
-      -e CONTEXT7_API_KEY="''${CONTEXT7_API_KEY}" \
+      -e CONTEXT7_API_KEY="''${CONTEXT7_API_KEY:-""}" \
       -e GEMINI_API_KEY="''${GEMINI_API_KEY:-""}" \
       -e OPENCODE_API_KEY="''${OPENCODE_API_KEY}" \
       -e OPENCODE_ENABLE_EXPERIMENTAL_MODELS="''${OPENCODE_ENABLE_EXPERIMENTAL_MODELS:-false}" \
-      -e ZAI_CODING_PLAN_API_KEY="''${ZAI_CODING_PLAN_API_KEY}" \
+      -e ZAI_CODING_PLAN_API_KEY="''${ZAI_CODING_PLAN_API_KEY:-""}" \
       -e TMPDIR="/workspace/tmp" \
       -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
       -v "opencode-local-$PORT:/home/agent/.local:rw" \
