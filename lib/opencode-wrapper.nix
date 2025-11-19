@@ -82,6 +82,7 @@ pkgs.writeShellApplication {
       -e OPENCODE_ENABLE_EXPERIMENTAL_MODELS="''${OPENCODE_ENABLE_EXPERIMENTAL_MODELS:-false}" \
       -e ZAI_CODING_PLAN_API_KEY="''${ZAI_CODING_PLAN_API_KEY:-""}" \
       -e TMPDIR="/workspace/tmp" \
+      -e TZ="''${TZ:-"Asia/Taipei"}" \
       -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
       -v "opencode-local-$PORT:/home/agent/.local:rw" \
       -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
