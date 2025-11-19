@@ -1,8 +1,7 @@
-{ pkgs, pkgs-unstable, fenix-pkgs }:
+{ pkgs, fenix-pkgs, opencode-pkg }:
 
 let
   inherit (pkgs.dockerTools) buildImage streamLayeredImage;
-  opencode-pkg = pkgs-unstable.opencode;
 in
 
 rec {
