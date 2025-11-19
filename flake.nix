@@ -3,16 +3,16 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs-ruby.url = "github:bobvanderlinden/nixpkgs-ruby";
+    opencode.url = "github:sst/opencode";
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, flake-utils, fenix, nixpkgs-ruby, ... }:
+  outputs = { nixpkgs, flake-utils, fenix, nixpkgs-ruby, opencode, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -21,11 +21,11 @@
             nixpkgs-ruby.overlays.default
           ];
         };
-        pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
         fenix-pkgs = fenix.packages.${system}.stable;
+        opencode-pkg = opencode.packages.${system}.default;
 
         opencodeImages = import ./images { 
-          inherit pkgs pkgs-unstable fenix-pkgs; 
+          inherit pkgs fenix-pkgs opencode-pkg; 
         };
 
         mkOpencodeWrapper = import ./lib/opencode-wrapper.nix { inherit pkgs; };
@@ -33,19 +33,19 @@
 
         opencodeWrapper = mkOpencodeWrapper {
           image = opencodeImages.opencode;
-          imageName = "agent-opencode:${pkgs-unstable.opencode.version}";
+          imageName = "agent-opencode:${opencode-pkg.version}";
         };
 
         opencodeRustWrapper = mkOpencodeWrapper {
           image = opencodeImages.opencode-rust;
-          imageName = "agent-opencode:${pkgs-unstable.opencode.version}-rust";
+          imageName = "agent-opencode:${opencode-pkg.version}-rust";
           variant = "rust";
           cargoCache = true;
         };
 
         opencodeRubyWrapper = mkOpencodeWrapper {
           image = opencodeImages.opencode-ruby;
-          imageName = "agent-opencode:${pkgs-unstable.opencode.version}-ruby";
+          imageName = "agent-opencode:${opencode-pkg.version}-ruby";
           variant = "ruby";
         };
 
