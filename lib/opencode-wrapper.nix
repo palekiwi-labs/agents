@@ -10,6 +10,7 @@ pkgs.writeShellApplication {
   runtimeInputs = [ pkgs.docker ];
   text = ''
     IMAGE_NAME="${imageName}"
+    USER="user"
 
     # Load image if not present
     if ! docker image inspect "$IMAGE_NAME" > /dev/null 2>&1; then
@@ -42,6 +43,17 @@ pkgs.writeShellApplication {
 
     WORKSPACE=$(realpath "$WORKSPACE")
 
+    # Calculate container path - preserve directory structure under /home/$USER or /workspace
+    if [[ "$WORKSPACE" == "$HOME"/* ]]; then
+      # Path is under $HOME, use relative path from $HOME
+      RELATIVE_PATH="''${WORKSPACE#"$HOME"/}"
+      CONTAINER_WORKSPACE="/home/$USER/$RELATIVE_PATH"
+    else
+      # Path is outside $HOME, strip leading / and mount under /workspace
+      RELATIVE_PATH="''${WORKSPACE#/}"
+      CONTAINER_WORKSPACE="/workspace/$RELATIVE_PATH"
+    fi
+
     SHADOW_MOUNTS=()
     if [[ -n "''${AGENTS_FORBIDDEN:-}" ]]; then
       IFS=':' read -ra PATHS <<< "$AGENTS_FORBIDDEN"
@@ -49,9 +61,9 @@ pkgs.writeShellApplication {
         if [[ -n "$path" ]]; then
           FULL_PATH="$WORKSPACE/$path"
           if [[ -d "$FULL_PATH" ]]; then
-            SHADOW_MOUNTS+=(--tmpfs "/workspace/$(basename "$WORKSPACE")/$path:ro,noexec,nosuid,size=1k,mode=000")
+            SHADOW_MOUNTS+=(--tmpfs "$CONTAINER_WORKSPACE/$path:ro,noexec,nosuid,size=1k,mode=000")
           elif [[ -f "$FULL_PATH" ]]; then
-            SHADOW_MOUNTS+=(-v "/dev/null:/workspace/$(basename "$WORKSPACE")/$path:ro")
+            SHADOW_MOUNTS+=(-v "/dev/null:$CONTAINER_WORKSPACE/$path:ro")
           fi
         fi
       done
@@ -62,7 +74,7 @@ pkgs.writeShellApplication {
       --tmpfs /tmp:noexec,nosuid,size=500m \
       --tmpfs /workspace/tmp:exec,nosuid,size=500m \
       ${if cargoCache then 
-        ''-v "opencode-cargo-$PORT:/home/agent/.cargo:rw"''
+        ''-v "opencode-cargo-$PORT:/home/$USER/.cargo:rw"''
       else 
         ''''} \
       --security-opt no-new-privileges \
@@ -72,7 +84,7 @@ pkgs.writeShellApplication {
       --cpus "''${OPENCODE_CPUS:-1.0}" \
       --pids-limit "''${OPENCODE_PIDS_LIMIT:-100}" \
       -p "$PORT:80" \
-      -e USER="agent" \
+      -e USER="$USER" \
       -e TERM="xterm-256color" \
       -e COLORTERM="truecolor" \
       -e FORCE_COLOR=1 \
@@ -82,14 +94,15 @@ pkgs.writeShellApplication {
       -e OPENCODE_ENABLE_EXPERIMENTAL_MODELS="''${OPENCODE_ENABLE_EXPERIMENTAL_MODELS:-false}" \
       -e ZAI_CODING_PLAN_API_KEY="''${ZAI_CODING_PLAN_API_KEY:-""}" \
       -e TMPDIR="/workspace/tmp" \
-      -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
-      -v "opencode-local-$PORT:/home/agent/.local:rw" \
-      -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
-      -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
+      -e TZ="''${TZ:-"Asia/Taipei"}" \
+      -v "opencode-cache-$PORT:/home/$USER/.cache:rw" \
+      -v "opencode-local-$PORT:/home/$USER/.local:rw" \
+      -v "$CONFIG_DIR:/home/$USER/.config/opencode:ro" \
+      -v "$WORKSPACE:$CONTAINER_WORKSPACE:rw" \
       -v /etc/localtime:/etc/localtime:ro \
       -v /etc/timezone:/etc/timezone:ro \
       "''${SHADOW_MOUNTS[@]}" \
-      --workdir "/workspace/$(basename "$WORKSPACE")" \
+      --workdir "$CONTAINER_WORKSPACE" \
       --name "$CONTAINER_NAME" \
       "$IMAGE_NAME" opencode "$@"
   '';
