@@ -6,7 +6,7 @@ in
 
 rec {
   baseAgentConfig = {
-    User = "agent";
+    User = "user";
     Cmd = [ "opencode" ];
     WorkingDir = "/workspace";
     Env = [
@@ -15,20 +15,20 @@ rec {
     ];
     Volumes = {
       "/workspace" = { };
-      "/home/agent/.cache" = { };
-      "/home/agent/.local" = { };
+      "/home/user/.cache" = { };
+      "/home/user/.local" = { };
     };
   };
 
   cargoAgentConfig = baseAgentConfig // {
     Volumes = baseAgentConfig.Volumes // {
-      "/home/agent/.cargo" = { };
+      "/home/user/.cargo" = { };
     };
   };
 
   rubyAgentConfig = baseAgentConfig // {
     Volumes = baseAgentConfig.Volumes // {
-      "/home/agent/.bundle" = { };
+      "/home/user/.bundle" = { };
     };
   };
 
@@ -59,23 +59,23 @@ rec {
     runAsRoot = ''
       #!${pkgs.runtimeShell}
       ${pkgs.dockerTools.shadowSetup}
-      groupadd agent
-      useradd -g agent -m -d /home/agent agent
+      groupadd user
+      useradd -g user -m -d /home/user user
 
       mkdir -p /workspace
-      chown agent:agent /workspace
+      chown user:user /workspace
 
-      mkdir /home/agent/.cache
-      chown agent:agent /home/agent/.cache
+      mkdir /home/user/.cache
+      chown user:user /home/user/.cache
 
-      mkdir /home/agent/.local
-      chown agent:agent /home/agent/.local
+      mkdir /home/user/.local
+      chown user:user /home/user/.local
 
-      mkdir /home/agent/.cargo
-      chown agent:agent /home/agent/.cargo
+      mkdir /home/user/.cargo
+      chown user:user /home/user/.cargo
 
-      mkdir /home/agent/.bundle
-      chown agent:agent /home/agent/.bundle
+      mkdir /home/user/.bundle
+      chown user:user /home/user/.bundle
 
       mkdir -p /usr/bin
       ln -s ${pkgs.coreutils}/bin/env /usr/bin/env

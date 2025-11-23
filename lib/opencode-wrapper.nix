@@ -42,11 +42,11 @@ pkgs.writeShellApplication {
 
     WORKSPACE=$(realpath "$WORKSPACE")
 
-    # Calculate container path - preserve directory structure under /home/agent or /workspace
+    # Calculate container path - preserve directory structure under /home/user or /workspace
     if [[ "$WORKSPACE" == "$HOME"/* ]]; then
       # Path is under $HOME, use relative path from $HOME
       RELATIVE_PATH="''${WORKSPACE#"$HOME"/}"
-      CONTAINER_WORKSPACE="/home/agent/$RELATIVE_PATH"
+      CONTAINER_WORKSPACE="/home/user/$RELATIVE_PATH"
     else
       # Path is outside $HOME, strip leading / and mount under /workspace
       RELATIVE_PATH="''${WORKSPACE#/}"
@@ -73,7 +73,7 @@ pkgs.writeShellApplication {
       --tmpfs /tmp:noexec,nosuid,size=500m \
       --tmpfs /workspace/tmp:exec,nosuid,size=500m \
       ${if cargoCache then 
-        ''-v "opencode-cargo-$PORT:/home/agent/.cargo:rw"''
+        ''-v "opencode-cargo-$PORT:/home/user/.cargo:rw"''
       else 
         ''''} \
       --security-opt no-new-privileges \
@@ -83,7 +83,7 @@ pkgs.writeShellApplication {
       --cpus "''${OPENCODE_CPUS:-1.0}" \
       --pids-limit "''${OPENCODE_PIDS_LIMIT:-100}" \
       -p "$PORT:80" \
-      -e USER="agent" \
+      -e USER="user" \
       -e TERM="xterm-256color" \
       -e COLORTERM="truecolor" \
       -e FORCE_COLOR=1 \
@@ -94,9 +94,9 @@ pkgs.writeShellApplication {
       -e ZAI_CODING_PLAN_API_KEY="''${ZAI_CODING_PLAN_API_KEY:-""}" \
       -e TMPDIR="/workspace/tmp" \
       -e TZ="''${TZ:-"Asia/Taipei"}" \
-      -v "opencode-cache-$PORT:/home/agent/.cache:rw" \
-      -v "opencode-local-$PORT:/home/agent/.local:rw" \
-      -v "$CONFIG_DIR:/home/agent/.config/opencode:ro" \
+      -v "opencode-cache-$PORT:/home/user/.cache:rw" \
+      -v "opencode-local-$PORT:/home/user/.local:rw" \
+      -v "$CONFIG_DIR:/home/user/.config/opencode:ro" \
       -v "$WORKSPACE:$CONTAINER_WORKSPACE:rw" \
       -v /etc/localtime:/etc/localtime:ro \
       -v /etc/timezone:/etc/timezone:ro \
