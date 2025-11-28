@@ -46,7 +46,11 @@ pkgs.writeShellApplication {
     # Handle rgignore file mounting
     RGIGNORE_MOUNT=()
     if [[ -n "''${OPENCODE_RGIGNORE:-}" ]] && [[ -f "$OPENCODE_RGIGNORE" ]]; then
+      # Explicit path via env var (highest priority)
       RGIGNORE_MOUNT=(-v "$OPENCODE_RGIGNORE:/home/$USER/.rgignore:ro")
+    elif [[ -f "$CONFIG_DIR/.rgignore" ]]; then
+      # Default config directory location
+      RGIGNORE_MOUNT=(-v "$CONFIG_DIR/.rgignore:/home/$USER/.rgignore:ro")
     fi
 
     # Calculate container path - preserve directory structure under /home/$USER or /workspace
