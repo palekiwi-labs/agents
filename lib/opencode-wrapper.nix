@@ -43,6 +43,12 @@ pkgs.writeShellApplication {
 
     WORKSPACE=$(realpath "$WORKSPACE")
 
+    # Handle rgignore file mounting
+    RGIGNORE_MOUNT=()
+    if [[ -n "''${OPENCODE_RGIGNORE:-}" ]] && [[ -f "$OPENCODE_RGIGNORE" ]]; then
+      RGIGNORE_MOUNT=(-v "$OPENCODE_RGIGNORE:/home/$USER/.rgignore:ro")
+    fi
+
     # Calculate container path - preserve directory structure under /home/$USER or /workspace
     if [[ "$WORKSPACE" == "$HOME"/* ]]; then
       # Path is under $HOME, use relative path from $HOME
@@ -99,10 +105,11 @@ pkgs.writeShellApplication {
       -v "opencode-local-$PORT:/home/$USER/.local:rw" \
       -v "$CONFIG_DIR:/home/$USER/.config/opencode:ro" \
       -v "$WORKSPACE:$CONTAINER_WORKSPACE:rw" \
-      -v /etc/localtime:/etc/localtime:ro \
-      -v /etc/timezone:/etc/timezone:ro \
-      "''${SHADOW_MOUNTS[@]}" \
-      --workdir "$CONTAINER_WORKSPACE" \
+       -v /etc/localtime:/etc/localtime:ro \
+        -v /etc/timezone:/etc/timezone:ro \
+        "''${SHADOW_MOUNTS[@]}" \
+        "''${RGIGNORE_MOUNT[@]}" \
+        --workdir "$CONTAINER_WORKSPACE" \
       --name "$CONTAINER_NAME" \
       "$IMAGE_NAME" opencode "$@"
   '';
