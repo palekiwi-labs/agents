@@ -19,7 +19,7 @@ pkgs.writeShellApplication {
     fi
   
     # Create isolated config directory
-    CONFIG_DIR="''${OPENCODE_CONFIG_DIR:-$HOME/.config/agent-opencode}"
+    CONFIG_DIR="''${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
     mkdir -p "$CONFIG_DIR"
 
     # Generate container name from parent and base directory
