@@ -56,6 +56,7 @@ nix run .#opencode
 #### OpenCode Configuration
 - `OPENCODE_CONTAINER_NAME` - Container name (default: `opencode-{parent-dir}-{current-dir}`)
 - `OPENCODE_PORT` - Port mapping (default: deterministically generated from container name, 32768-65535)
+- `OPENCODE_PUBLISH_PORT` - Whether to publish the web interface port (default: `true`, set to `false` to disable)
 - `OPENCODE_CONFIG_DIR` - Configuration directory (default: `$HOME/.config/agent-opencode`)
 - `OPENCODE_NETWORK` - Docker network mode (default: `bridge`)
 - `OPENCODE_MEMORY` - Memory limit (default: `1024m`)
@@ -97,8 +98,20 @@ The container runs with strict security measures:
 
 Each workspace gets a unique container name based on the parent and current directory names:
 - Container name: `opencode-{parent-dir}-{current-dir}`
-- Port: Deterministically generated from container name (32768-65535)
-- Volumes: Workspace-specific cache and local directories
+- Port: Deterministically generated from container name (32768-65535), used for both publishing and volume naming
+- Volumes: Workspace-specific cache and local directories (named using port for uniqueness)
+- Port publishing can be disabled via `OPENCODE_PUBLISH_PORT=false`
+
+### Disabling Port Publishing
+
+By default, OpenCode publishes its web interface on a deterministic port. If you don't need web access and want to run in pure CLI mode, you can disable port publishing:
+
+```bash
+export OPENCODE_PUBLISH_PORT=false
+nix run .#opencode
+```
+
+**Note:** The port number is still generated and used for volume naming to ensure workspace isolation, even when publishing is disabled. This ensures that different workspaces maintain separate cache and configuration volumes.
 
 ## Build Targets
 
