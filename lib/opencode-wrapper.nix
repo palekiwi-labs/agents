@@ -3,7 +3,7 @@
 { image, imageName, variant ? "", cargoCache ? false }:
 let
   utils = import ./utils.nix { inherit pkgs; };
-  inherit (utils) generate_port_from_path;
+  inherit (utils) generate_port_from_name;
 in
 pkgs.writeShellApplication {
   name = "opencode${if variant != "" then "-${variant}" else ""}";
@@ -28,7 +28,8 @@ pkgs.writeShellApplication {
     CONTAINER_NAME="''${OPENCODE_CONTAINER_NAME:-opencode-''${PARENT_DIR}-''${BASE_DIR}}"
 
     WORKSPACE="''${OPENCODE_WORKSPACE:-''${AGENTS_WORKSPACE:-}}"
-    PORT="''${OPENCODE_PORT:-$(${generate_port_from_path})}"
+    # Generate port from container name to ensure consistency and reduce conflicts
+    PORT="''${OPENCODE_PORT:-$(${generate_port_from_name} "$CONTAINER_NAME")}"
 
     if [[ -z "$WORKSPACE" ]]; then
       echo "Error: OPENCODE_WORKSPACE or AGENTS_WORKSPACE environment variable is required" >&2

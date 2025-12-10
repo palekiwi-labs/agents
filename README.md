@@ -8,7 +8,7 @@ This project creates a secure, containerized environment for running OpenCode AI
 
 - **Security-first design**: Read-only filesystem, dropped capabilities, resource limits
 - **Workspace isolation**: Only mounts specified directories with controlled access
-- **Deterministic ports**: Generates consistent ports based on workspace path
+- **Deterministic ports**: Generates consistent ports based on container name
 - **Nix-based builds**: Reproducible container images using Nix flakes
 
 ## Features
@@ -55,7 +55,7 @@ nix run .#opencode
 
 #### OpenCode Configuration
 - `OPENCODE_CONTAINER_NAME` - Container name (default: `opencode-{parent-dir}-{current-dir}`)
-- `OPENCODE_PORT` - Port mapping (default: deterministically generated from path, 32768-65535)
+- `OPENCODE_PORT` - Port mapping (default: deterministically generated from container name, 32768-65535)
 - `OPENCODE_CONFIG_DIR` - Configuration directory (default: `$HOME/.config/agent-opencode`)
 - `OPENCODE_NETWORK` - Docker network mode (default: `bridge`)
 - `OPENCODE_MEMORY` - Memory limit (default: `1024m`)
@@ -97,7 +97,7 @@ The container runs with strict security measures:
 
 Each workspace gets a unique container name based on the parent and current directory names:
 - Container name: `opencode-{parent-dir}-{current-dir}`
-- Port: Deterministically generated from directory path (32768-65535)
+- Port: Deterministically generated from container name (32768-65535)
 - Volumes: Workspace-specific cache and local directories
 
 ## Build Targets
@@ -140,5 +140,5 @@ nix run .#opencode-rust-image-script | docker load
 The project uses Nix flakes for reproducible builds and includes:
 - Security-hardened Docker configuration
 - Workspace-isolated execution
-- Deterministic port allocation
+- Deterministic port allocation (based on container name)
 - Read-only container filesystem
