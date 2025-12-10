@@ -42,6 +42,7 @@ pkgs.writeShellApplication {
     fi
 
     WORKSPACE=$(realpath "$WORKSPACE")
+    CONFIG_DIR=$(realpath "$CONFIG_DIR")
 
     # Handle rgignore file mounting
     RGIGNORE_MOUNT=()
@@ -78,6 +79,19 @@ pkgs.writeShellApplication {
         fi
       done
     fi
+
+    # Detect mount conflicts: if CONFIG_DIR and WORKSPACE point to same location
+    # and would mount to same container path, handle specially
+    CONFIG_MOUNT_MODE="ro"
+    WORKSPACE_MOUNT=(-v "$WORKSPACE:$CONTAINER_WORKSPACE:rw")
+    
+    if [[ "$CONFIG_DIR" == "$WORKSPACE" ]] && [[ "/home/$USER/.config/opencode" == "$CONTAINER_WORKSPACE" ]]; then
+      # Conflict: same host dir would mount to same container path with different permissions
+      # Solution: make config mount read-write and skip workspace mount
+      echo "Info: Config directory is the workspace - mounting as read-write" >&2
+      CONFIG_MOUNT_MODE="rw"
+      WORKSPACE_MOUNT=()
+    fi
   
     exec docker run --rm -it \
       --read-only \
@@ -107,9 +121,9 @@ pkgs.writeShellApplication {
       -e TZ="''${TZ:-"Asia/Taipei"}" \
       -v "opencode-cache-$PORT:/home/$USER/.cache:rw" \
       -v "opencode-local-$PORT:/home/$USER/.local:rw" \
-      -v "$CONFIG_DIR:/home/$USER/.config/opencode:ro" \
-      -v "$WORKSPACE:$CONTAINER_WORKSPACE:rw" \
-       -v /etc/localtime:/etc/localtime:ro \
+      -v "$CONFIG_DIR:/home/$USER/.config/opencode:$CONFIG_MOUNT_MODE" \
+      "''${WORKSPACE_MOUNT[@]}" \
+      -v /etc/localtime:/etc/localtime:ro \
         -v /etc/timezone:/etc/timezone:ro \
         "''${SHADOW_MOUNTS[@]}" \
         "''${RGIGNORE_MOUNT[@]}" \
