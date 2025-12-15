@@ -29,7 +29,6 @@
         };
 
         mkOpencodeWrapper = import ./lib/opencode-wrapper.nix { inherit pkgs; };
-        mkGeminiWrapper = import ./lib/gemini-wrapper.nix { inherit pkgs; };
 
         opencodeWrapper = mkOpencodeWrapper {
           image = opencodeImages.opencode;
@@ -48,12 +47,6 @@
           imageName = "agent-opencode:${opencode-pkg.version}-ruby";
           variant = "ruby";
         };
-
-        geminiWrapper = mkGeminiWrapper {
-          image = opencodeImages.gemini;
-          imageName = "agent-gemini-cli:${(pkgs.callPackage ./pkgs/gemini-cli-bin.nix {}).version}";
-        };
-
       in
       {
         packages = {
@@ -62,8 +55,6 @@
           opencode = opencodeWrapper;
           opencode-rust = opencodeRustWrapper;
           opencode-ruby = opencodeRubyWrapper;
-
-          gemini = geminiWrapper;
 
           opencode-image-script = opencodeImages.opencode;
           opencode-rust-image-script = opencodeImages.opencode-rust;
