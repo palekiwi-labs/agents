@@ -152,5 +152,5 @@ nix run .#opencode-rust-image-script | docker load
 The project uses Nix flakes for reproducible builds and includes:
 - Security-hardened Docker configuration
 - Workspace-isolated execution
-- Deterministic port allocation (based on container name)
+- Deterministic port allocation
 - Read-only container filesystem
