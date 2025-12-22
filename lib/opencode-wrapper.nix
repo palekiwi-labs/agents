@@ -3,7 +3,7 @@
 { image, imageName, variant ? "", cargoCache ? false }:
 let
   utils = import ./utils.nix { inherit pkgs; };
-  inherit (utils) generate_port_from_name;
+  inherit (utils) generate_port_from_path;
 in
 pkgs.writeShellApplication {
   name = "opencode${if variant != "" then "-${variant}" else ""}";
@@ -28,11 +28,8 @@ pkgs.writeShellApplication {
     CONTAINER_NAME="''${OPENCODE_CONTAINER_NAME:-opencode-''${PARENT_DIR}-''${BASE_DIR}}"
 
     WORKSPACE="''${OPENCODE_WORKSPACE:-''${AGENTS_WORKSPACE:-}}"
-    # Generate port from container name components (strip prefix for backward compatibility)
-    # This ensures consistent ports while maintaining the same port numbers as before
-    CONTAINER_BASE="''${CONTAINER_NAME#opencode-}"
-    PORT="''${OPENCODE_PORT:-$(${generate_port_from_name} "$CONTAINER_BASE")}"
-    
+    PORT="''${OPENCODE_PORT:-$(${generate_port_from_path})}"
+
     # Determine if port should be published (default: true)
     PUBLISH_PORT="''${OPENCODE_PUBLISH_PORT:-true}"
 

@@ -8,7 +8,7 @@ This project creates a secure, containerized environment for running OpenCode AI
 
 - **Security-first design**: Read-only filesystem, dropped capabilities, resource limits
 - **Workspace isolation**: Only mounts specified directories with controlled access
-- **Deterministic ports**: Generates consistent ports based on container name
+- **Deterministic ports**: Generates consistent ports based on workspace path
 - **Nix-based builds**: Reproducible container images using Nix flakes
 
 ## Features
@@ -55,8 +55,7 @@ nix run .#opencode
 
 #### OpenCode Configuration
 - `OPENCODE_CONTAINER_NAME` - Container name (default: `opencode-{parent-dir}-{current-dir}`)
-- `OPENCODE_PORT` - Port mapping (default: deterministically generated from container name, 32768-65535)
-- `OPENCODE_PUBLISH_PORT` - Whether to publish the web interface port (default: `true`, set to `false` to disable)
+- `OPENCODE_PORT` - Port mapping (default: deterministically generated from path, 32768-65535)
 - `OPENCODE_CONFIG_DIR` - Configuration directory (default: `$HOME/.config/agent-opencode`)
 - `OPENCODE_NETWORK` - Docker network mode (default: `bridge`)
 - `OPENCODE_MEMORY` - Memory limit (default: `1024m`)
@@ -98,8 +97,8 @@ The container runs with strict security measures:
 
 Each workspace gets a unique container name based on the parent and current directory names:
 - Container name: `opencode-{parent-dir}-{current-dir}`
-- Port: Deterministically generated from container name (32768-65535), used for both publishing and volume naming
-- Volumes: Workspace-specific cache and local directories (named using port for uniqueness)
+- Port: Deterministically generated from directory path (32768-65535)
+- Volumes: Workspace-specific cache and local directories
 - Port publishing can be disabled via `OPENCODE_PUBLISH_PORT=false`
 
 ### Disabling Port Publishing
