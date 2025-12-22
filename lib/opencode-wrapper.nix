@@ -30,6 +30,9 @@ pkgs.writeShellApplication {
     WORKSPACE="''${OPENCODE_WORKSPACE:-''${AGENTS_WORKSPACE:-}}"
     PORT="''${OPENCODE_PORT:-$(${generate_port_from_path})}"
 
+    # Determine if port should be published (default: true)
+    PUBLISH_PORT="''${OPENCODE_PUBLISH_PORT:-true}"
+
     if [[ -z "$WORKSPACE" ]]; then
       echo "Error: OPENCODE_WORKSPACE or AGENTS_WORKSPACE environment variable is required" >&2
       echo "Set it to the directory you want to mount as the workspace" >&2
@@ -92,6 +95,12 @@ pkgs.writeShellApplication {
       CONFIG_MOUNT_MODE="rw"
       WORKSPACE_MOUNT=()
     fi
+    
+    # Build port publishing args conditionally
+    PORT_ARGS=()
+    if [[ "$PUBLISH_PORT" == "true" ]]; then
+      PORT_ARGS=(-p "$PORT:80")
+    fi
   
     exec docker run --rm -it \
       --read-only \
@@ -107,7 +116,7 @@ pkgs.writeShellApplication {
       --memory "''${OPENCODE_MEMORY:-1024m}" \
       --cpus "''${OPENCODE_CPUS:-1.0}" \
       --pids-limit "''${OPENCODE_PIDS_LIMIT:-100}" \
-      -p "$PORT:80" \
+      "''${PORT_ARGS[@]}" \
       -e USER="$USER" \
       -e TERM="xterm-256color" \
       -e COLORTERM="truecolor" \

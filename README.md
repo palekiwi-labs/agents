@@ -99,6 +99,18 @@ Each workspace gets a unique container name based on the parent and current dire
 - Container name: `opencode-{parent-dir}-{current-dir}`
 - Port: Deterministically generated from directory path (32768-65535)
 - Volumes: Workspace-specific cache and local directories
+- Port publishing can be disabled via `OPENCODE_PUBLISH_PORT=false`
+
+### Disabling Port Publishing
+
+By default, OpenCode publishes its web interface on a deterministic port. If you don't need web access and want to run in pure CLI mode, you can disable port publishing:
+
+```bash
+export OPENCODE_PUBLISH_PORT=false
+nix run .#opencode
+```
+
+**Note:** The port number is still generated and used for volume naming to ensure workspace isolation, even when publishing is disabled. This ensures that different workspaces maintain separate cache and configuration volumes.
 
 ## Build Targets
 
