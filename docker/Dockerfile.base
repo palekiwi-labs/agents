@@ -1,0 +1,38 @@
+FROM debian:bookworm-slim
+
+# Install runtime dependencies (matching current Nix packages)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    coreutils \
+    curl \
+    fd-find \
+    findutils \
+    git \
+    gnupg \
+    grep \
+    gzip \
+    jq \
+    ripgrep \
+    sed \
+    tar \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create user and directories (matching current setup)
+RUN groupadd -g 1000 user && \
+    useradd -u 1000 -g user -m -d /home/user user && \
+    mkdir -p /workspace \
+             /home/user/.cache \
+             /home/user/.local \
+             /home/user/.cargo \
+             /home/user/.bundle && \
+    chown -R user:user /workspace /home/user
+
+# Ensure /usr/bin/env exists for portable shebangs
+RUN ln -sf /usr/bin/env /usr/bin/env || true
+
+# SSL certificates (matching Nix setup)
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+USER user
+WORKDIR /workspace

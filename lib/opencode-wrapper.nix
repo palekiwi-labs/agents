@@ -1,6 +1,6 @@
 { pkgs }:
 
-{ image, imageName, variant ? "", cargoCache ? false }:
+{ imageName, variant ? "", cargoCache ? false }:
 let
   utils = import ./utils.nix { inherit pkgs; };
   inherit (utils) generate_port_from_path;
@@ -12,10 +12,15 @@ pkgs.writeShellApplication {
     IMAGE_NAME="${imageName}"
     USER="user"
 
-    # Load image if not present
+    # Check if image exists locally, if not try to pull or prompt to build
     if ! docker image inspect "$IMAGE_NAME" > /dev/null 2>&1; then
-      echo "Loading opencode Docker image..." >&2
-      ${image} | docker load
+      echo "Image $IMAGE_NAME not found locally." >&2
+      echo "Attempting to pull from registry..." >&2
+      if ! docker pull "$IMAGE_NAME" 2>/dev/null; then
+        echo "Error: Could not find or pull image $IMAGE_NAME" >&2
+        echo "Build it with: task build:${if variant != "" then variant else "opencode"}" >&2
+        exit 1
+      fi
     fi
   
     # Create isolated config directory

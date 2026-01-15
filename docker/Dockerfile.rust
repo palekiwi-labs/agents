@@ -1,0 +1,26 @@
+ARG OPENCODE_IMAGE=agent-opencode:latest
+FROM ${OPENCODE_IMAGE}
+
+ARG RUST_VERSION=stable
+
+USER root
+
+# Install build dependencies for Rust
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libc6-dev \
+    make \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+USER user
+
+# Install Rust via rustup
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sh -s -- -y --default-toolchain ${RUST_VERSION} \
+    --component rust-analyzer,rustfmt,clippy,rust-src
+
+# Add Rust to PATH
+ENV PATH="/home/user/.cargo/bin:${PATH}"
+
+CMD ["opencode"]

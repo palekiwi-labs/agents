@@ -1,0 +1,160 @@
+version: '3'
+
+vars:
+  OPENCODE_VERSION:
+    sh: cat docker/.opencode-version
+  GEMINI_CLI_VERSION:
+    sh: cat docker/.gemini-version
+  RUBY_VERSION:
+    sh: cat images/ruby/.ruby-version
+  BUNDLER_VERSION:
+    sh: grep "BUNDLED WITH" -A1 images/ruby/Gemfile.lock | tail -1 | tr -d ' '
+  RUST_VERSION: "stable"
+  REGISTRY: "localhost"
+  
+dotenv: ['.env']
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  build:base:
+    desc: Build base image
+    cmds:
+      - |
+        docker build \
+          -f docker/Dockerfile.base \
+          -t {{.REGISTRY}}/agent-base:latest \
+          .
+
+  build:opencode:
+    desc: Build OpenCode image
+    deps: [build:base]
+    cmds:
+      - |
+        docker build \
+          -f docker/Dockerfile.opencode \
+          --build-arg BASE_IMAGE={{.REGISTRY}}/agent-base:latest \
+          --build-arg OPENCODE_VERSION={{.OPENCODE_VERSION}} \
+          -t {{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}} \
+          -t {{.REGISTRY}}/agent-opencode:latest \
+          .
+
+  build:rust:
+    desc: Build OpenCode + Rust image
+    deps: [build:opencode]
+    cmds:
+      - |
+        docker build \
+          -f docker/Dockerfile.rust \
+          --build-arg OPENCODE_IMAGE={{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}} \
+          --build-arg RUST_VERSION={{.RUST_VERSION}} \
+          -t {{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}}-rust \
+          -t {{.REGISTRY}}/agent-opencode:latest-rust \
+          .
+
+  build:ruby:
+    desc: Build OpenCode + Ruby image
+    deps: [build:opencode]
+    cmds:
+      - |
+        docker build \
+          -f docker/Dockerfile.ruby \
+          --build-arg OPENCODE_IMAGE={{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}} \
+          --build-arg RUBY_VERSION={{.RUBY_VERSION}} \
+          --build-arg BUNDLER_VERSION={{.BUNDLER_VERSION}} \
+          -t {{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}}-ruby \
+          -t {{.REGISTRY}}/agent-opencode:latest-ruby \
+          .
+
+  build:gemini:
+    desc: Build Gemini CLI image
+    cmds:
+      - |
+        docker build \
+          -f docker/Dockerfile.gemini \
+          --build-arg GEMINI_CLI_VERSION={{.GEMINI_CLI_VERSION}} \
+          -t {{.REGISTRY}}/agent-gemini-cli:{{.GEMINI_CLI_VERSION}} \
+          -t {{.REGISTRY}}/agent-gemini-cli:latest \
+          .
+
+  build:all:
+    desc: Build all images
+    cmds:
+      - task: build:base
+      - task: build:opencode
+      - task: build:rust
+      - task: build:ruby
+      - task: build:gemini
+
+  push:all:
+    desc: Push all images to registry
+    cmds:
+      - docker push {{.REGISTRY}}/agent-base:latest
+      - docker push {{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}}
+      - docker push {{.REGISTRY}}/agent-opencode:latest
+      - docker push {{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}}-rust
+      - docker push {{.REGISTRY}}/agent-opencode:latest-rust
+      - docker push {{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}}-ruby
+      - docker push {{.REGISTRY}}/agent-opencode:latest-ruby
+      - docker push {{.REGISTRY}}/agent-gemini-cli:{{.GEMINI_CLI_VERSION}}
+      - docker push {{.REGISTRY}}/agent-gemini-cli:latest
+
+  clean:
+    desc: Remove all built images
+    cmds:
+      - docker rmi {{.REGISTRY}}/agent-base:latest || true
+      - docker rmi {{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}} || true
+      - docker rmi {{.REGISTRY}}/agent-opencode:latest || true
+      - docker rmi {{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}}-rust || true
+      - docker rmi {{.REGISTRY}}/agent-opencode:latest-rust || true
+      - docker rmi {{.REGISTRY}}/agent-opencode:{{.OPENCODE_VERSION}}-ruby || true
+      - docker rmi {{.REGISTRY}}/agent-opencode:latest-ruby || true
+      - docker rmi {{.REGISTRY}}/agent-gemini-cli:{{.GEMINI_CLI_VERSION}} || true
+      - docker rmi {{.REGISTRY}}/agent-gemini-cli:latest || true
+
+  test:opencode:
+    desc: Test OpenCode image
+    deps: [build:opencode]
+    cmds:
+      - docker run --rm {{.REGISTRY}}/agent-opencode:latest opencode --version
+
+  test:rust:
+    desc: Test Rust image
+    deps: [build:rust]
+    cmds:
+      - docker run --rm {{.REGISTRY}}/agent-opencode:latest-rust rustc --version
+      - docker run --rm {{.REGISTRY}}/agent-opencode:latest-rust cargo --version
+
+  test:ruby:
+    desc: Test Ruby image
+    deps: [build:ruby]
+    cmds:
+      - docker run --rm {{.REGISTRY}}/agent-opencode:latest-ruby ruby --version
+      - docker run --rm {{.REGISTRY}}/agent-opencode:latest-ruby bundle --version
+
+  test:gemini:
+    desc: Test Gemini image
+    deps: [build:gemini]
+    cmds:
+      - docker run --rm {{.REGISTRY}}/agent-gemini-cli:latest --version
+
+  test:all:
+    desc: Test all images
+    cmds:
+      - task: test:opencode
+      - task: test:rust
+      - task: test:ruby
+      - task: test:gemini
+
+  info:
+    desc: Show build information
+    cmds:
+      - echo "OpenCode Version{{":"}} {{.OPENCODE_VERSION}}"
+      - echo "Gemini CLI Version{{":"}} {{.GEMINI_CLI_VERSION}}"
+      - echo "Ruby Version{{":"}} {{.RUBY_VERSION}}"
+      - echo "Bundler Version{{":"}} {{.BUNDLER_VERSION}}"
+      - echo "Rust Version{{":"}} {{.RUST_VERSION}}"
+      - echo "Registry{{":"}} {{.REGISTRY}}"

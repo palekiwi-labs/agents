@@ -1,0 +1,10 @@
+.git
+.nix
+result
+.direnv
+.envrc
+*.md
+TODO/
+.agents/
+tags
+flake.lock
