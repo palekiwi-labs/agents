@@ -3,17 +3,17 @@
 { imageName, variant ? "" }:
 pkgs.writeShellApplication {
   name = "gemini${if variant != "" then "-${variant}" else ""}";
-  runtimeInputs = [ pkgs.docker ];
+  runtimeInputs = [ pkgs.go-task ];
   text = ''
     IMAGE_NAME="${imageName}"
 
-    # Check if image exists locally, if not try to pull or prompt to build
+    # Check if image exists locally, if not build it
     if ! docker image inspect "$IMAGE_NAME" > /dev/null 2>&1; then
       echo "Image $IMAGE_NAME not found locally." >&2
-      echo "Attempting to pull from registry..." >&2
-      if ! docker pull "$IMAGE_NAME" 2>/dev/null; then
-        echo "Error: Could not find or pull image $IMAGE_NAME" >&2
-        echo "Build it with: task build:gemini" >&2
+      echo "Building image with go-task..." >&2
+      task build:gemini
+      if ! docker image inspect "$IMAGE_NAME" > /dev/null 2>&1; then
+        echo "Error: Failed to build image $IMAGE_NAME" >&2
         exit 1
       fi
     fi
@@ -74,10 +74,9 @@ pkgs.writeShellApplication {
       -e TMPDIR="/workspace/tmp" \
       -e CONTEXT7_API_KEY="''${CONTEXT7_API_KEY:-""}" \
       -v "$CONFIG_DIR:/home/agent/.gemini" \
-      -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
-      -v /etc/localtime:/etc/localtime:ro \
-      -v /etc/timezone:/etc/timezone:ro \
-      "''${SHADOW_MOUNTS[@]}" \
+       -v "$WORKSPACE:/workspace/$(basename "$WORKSPACE"):rw" \
+       -v /etc/localtime:/etc/localtime:ro \
+       "''${SHADOW_MOUNTS[@]}" \
       --workdir "/workspace/$(basename "$WORKSPACE")" \
       --name "$CONTAINER_NAME" \
       "$IMAGE_NAME" gemini "$@"

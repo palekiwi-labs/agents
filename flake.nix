@@ -11,9 +11,11 @@
       let
         pkgs = import nixpkgs { inherit system; };
         
-        # Read versions from files
-        opencodeVersion = builtins.readFile ./docker/.opencode-version;
-        geminiVersion = builtins.readFile ./docker/.gemini-version;
+        # Read versions from files and strip newlines
+        opencodeVersionFile = builtins.readFile ./docker/.opencode-version;
+        opencodeVersion = builtins.replaceStrings [ "\n" ] [ "" ] opencodeVersionFile;
+        geminiVersionFile = builtins.readFile ./docker/.gemini-version;
+        geminiVersion = builtins.replaceStrings [ "\n" ] [ "" ] geminiVersionFile;
 
         mkOpencodeWrapper = import ./lib/opencode-wrapper.nix { inherit pkgs; };
         mkGeminiWrapper = import ./lib/gemini-wrapper.nix { inherit pkgs; };
