@@ -149,10 +149,10 @@ Run `task --list` to see all available tasks:
 ### Image Tags
 
 Images are tagged with both specific versions and `latest`:
-- `agent-opencode:1.0.0` and `agent-opencode:latest`
-- `agent-opencode:1.0.0-rust` and `agent-opencode:latest-rust`
-- `agent-opencode:1.0.0-ruby` and `agent-opencode:latest-ruby`
-- `agent-gemini-cli:0.10.0` and `agent-gemini-cli:latest`
+- `docker-agent-opencode:1.0.0` and `docker-agent-opencode:latest`
+- `docker-agent-opencode:1.0.0-rust` and `docker-agent-opencode:latest-rust`
+- `docker-agent-opencode:1.0.0-ruby` and `docker-agent-opencode:latest-ruby`
+- `docker-gemini-cli:0.10.0` and `docker-gemini-cli:latest`
 
 ## Build Targets
 

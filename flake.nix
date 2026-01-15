@@ -19,22 +19,22 @@
         mkGeminiWrapper = import ./lib/gemini-wrapper.nix { inherit pkgs; };
 
         opencodeWrapper = mkOpencodeWrapper {
-          imageName = "localhost/agent-opencode:${opencodeVersion}";
+          imageName = "localhost/docker-agent-opencode:${opencodeVersion}";
         };
 
         opencodeRustWrapper = mkOpencodeWrapper {
-          imageName = "localhost/agent-opencode:${opencodeVersion}-rust";
+          imageName = "localhost/docker-agent-opencode:${opencodeVersion}-rust";
           variant = "rust";
           cargoCache = true;
         };
 
         opencodeRubyWrapper = mkOpencodeWrapper {
-          imageName = "localhost/agent-opencode:${opencodeVersion}-ruby";
+          imageName = "localhost/docker-agent-opencode:${opencodeVersion}-ruby";
           variant = "ruby";
         };
 
         geminiWrapper = mkGeminiWrapper {
-          imageName = "localhost/agent-gemini-cli:${geminiVersion}";
+          imageName = "localhost/docker-gemini-cli:${geminiVersion}";
         };
 
       in
