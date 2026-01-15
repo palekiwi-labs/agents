@@ -22,6 +22,7 @@ Migrated from Nix's `dockerTools.buildImage` and `streamLayeredImage` to standar
 - Images built via standard Dockerfiles in `docker/` directory
 - Build automation via go-task (`Taskfile.yml`)
 - Build command: `task build:all`
+- Image names use `docker-` prefix (e.g., `docker-agent-opencode:1.0.0`)
 - Nix still used for wrapper scripts and dev environment
 
 ## What Stayed the Same

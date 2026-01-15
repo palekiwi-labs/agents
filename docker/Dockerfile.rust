@@ -1,4 +1,4 @@
-ARG OPENCODE_IMAGE=agent-opencode:latest
+ARG OPENCODE_IMAGE=docker-agent-opencode:latest
 FROM ${OPENCODE_IMAGE}
 
 ARG RUST_VERSION=stable

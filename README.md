@@ -171,9 +171,9 @@ Images are tagged with both specific versions and `latest`:
 
 ## Architecture
 
-- **Base image**: Minimal container with essential tools (bash, coreutils, git, ripgrep)
-- **OpenCode layer**: Adds OpenCode AI from nixpkgs-master
-- **Specialized variants**: Additional tooling (rust-analyzer for Rust development)
+- **Base image** (`docker-agent-base`): Minimal container with essential tools (bash, coreutils, git, ripgrep)
+- **OpenCode layer** (`docker-agent-opencode`): Adds OpenCode AI binary
+- **Specialized variants**: Additional tooling (rust-analyzer for Rust development, Ruby 3.4.5 for Ruby development)
 - **Wrapper script**: Handles container lifecycle, security, and workspace mounting with variant-specific image selection
 
 ## Development

@@ -25,7 +25,7 @@ tasks:
       - |
         docker build \
           -f docker/Dockerfile.base \
-          -t localhost/agent-base:latest \
+          -t localhost/docker-agent-base:latest \
           .
 
   build:opencode:
@@ -35,7 +35,7 @@ tasks:
       - |
         docker build \
           -f docker/Dockerfile.opencode \
-          --build-arg BASE_IMAGE=localhost/agent-base:latest \
+          --build-arg BASE_IMAGE=localhost/docker-agent-base:latest \
           --build-arg OPENCODE_VERSION={{.OPENCODE_VERSION}} \
           -t localhost/docker-agent-opencode:{{.OPENCODE_VERSION}} \
           -t localhost/docker-agent-opencode:latest \
@@ -91,7 +91,7 @@ tasks:
   push:all:
     desc: Push all images to registry
     cmds:
-      - docker push localhost/agent-base:latest
+      - docker push localhost/docker-agent-base:latest
       - docker push localhost/docker-agent-opencode:{{.OPENCODE_VERSION}}
       - docker push localhost/docker-agent-opencode:latest
       - docker push localhost/docker-agent-opencode:{{.OPENCODE_VERSION}}-rust
@@ -104,7 +104,7 @@ tasks:
   clean:
     desc: Remove all built images
     cmds:
-      - docker rmi localhost/agent-base:latest || true
+      - docker rmi localhost/docker-agent-base:latest || true
       - docker rmi localhost/docker-agent-opencode:{{.OPENCODE_VERSION}} || true
       - docker rmi localhost/docker-agent-opencode:latest || true
       - docker rmi localhost/docker-agent-opencode:{{.OPENCODE_VERSION}}-rust || true

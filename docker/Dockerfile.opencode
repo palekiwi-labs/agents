@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=agent-base:latest
+ARG BASE_IMAGE=docker-agent-base:latest
 FROM ${BASE_IMAGE}
 
 ARG OPENCODE_VERSION
