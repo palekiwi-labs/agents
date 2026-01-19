@@ -21,8 +21,9 @@ This project creates a secure, containerized environment for running OpenCode AI
 
 ## Prerequisites
 
-- Nix
 - Docker
+- [go-task](https://taskfile.dev) (install: `brew install go-task` or see [installation guide](https://taskfile.dev/installation/))
+- Nix (optional, for wrapper scripts)
 - `OPENCODE_WORKSPACE` or `AGENTS_WORKSPACE` environment variable set to your workspace directory
 
 ## Usage
@@ -112,39 +113,67 @@ nix run .#opencode
 
 **Note:** The port number is still generated and used for volume naming to ensure workspace isolation, even when publishing is disabled. This ensures that different workspaces maintain separate cache and configuration volumes.
 
+## Building Images
+
+This project uses [go-task](https://taskfile.dev) for build automation and standard Dockerfiles for container images.
+
+### Building Images
+
+```bash
+# Build all images
+task build:all
+
+# Build specific images
+task build:base
+task build:opencode
+task build:rust
+task build:ruby
+task build:gemini
+
+# Show build info (versions, etc.)
+task info
+
+# Test images
+task test:all
+```
+
+### Available Tasks
+
+Run `task --list` to see all available tasks:
+- `build:*` - Build specific or all images
+- `test:*` - Test specific or all images
+- `push:all` - Push all images to registry
+- `clean` - Remove all built images
+- `info` - Show build information
+
+### Image Tags
+
+Images are tagged with both specific versions and `latest`:
+- `docker-agent-opencode:1.0.0` and `docker-agent-opencode:latest`
+- `docker-agent-opencode:1.0.0-rust` and `docker-agent-opencode:latest-rust`
+- `docker-agent-opencode:1.0.0-ruby` and `docker-agent-opencode:latest-ruby`
+- `docker-gemini-cli:0.10.0` and `docker-gemini-cli:latest`
+
 ## Build Targets
 
 ### Applications
 - `nix run` - Run OpenCode wrapper (default)
 - `nix run .#opencode` - Run default OpenCode wrapper
 - `nix run .#opencode-rust` - Run Rust-enabled OpenCode wrapper
+- `nix run .#opencode-ruby` - Run Ruby-enabled OpenCode wrapper
+- `nix run .#gemini` - Run Gemini CLI wrapper
 
 ### Packages
 - `nix build .#opencode` - Build default OpenCode wrapper
 - `nix build .#opencode-rust` - Build Rust-enabled OpenCode wrapper
-
-### Container Image Scripts
-- `nix build .#opencode-image-script` - Build script for default container image
-- `nix build .#opencode-rust-image-script` - Build script for Rust container image
-
-To build and load images manually:
-```bash
-# Build and load default image
-nix build .#opencode-image-script && result | docker load
-
-# Build and load Rust image  
-nix build .#opencode-rust-image-script && result | docker load
-
-# Or run directly without building first
-nix run .#opencode-image-script | docker load
-nix run .#opencode-rust-image-script | docker load
-```
+- `nix build .#opencode-ruby` - Build Ruby-enabled OpenCode wrapper
+- `nix build .#gemini` - Build Gemini CLI wrapper
 
 ## Architecture
 
-- **Base image**: Minimal container with essential tools (bash, coreutils, git, ripgrep)
-- **OpenCode layer**: Adds OpenCode AI from nixpkgs-master
-- **Specialized variants**: Additional tooling (rust-analyzer for Rust development)
+- **Base image** (`docker-agent-base`): Minimal container with essential tools (bash, coreutils, git, ripgrep)
+- **OpenCode layer** (`docker-agent-opencode`): Adds OpenCode AI binary
+- **Specialized variants**: Additional tooling (rust-analyzer for Rust development, Ruby 3.4.5 for Ruby development)
 - **Wrapper script**: Handles container lifecycle, security, and workspace mounting with variant-specific image selection
 
 ## Development

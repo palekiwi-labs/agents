@@ -1,21 +1,32 @@
 { pkgs }:
 
-{ image, imageName, variant ? "", cargoCache ? false }:
+{ imageName, variant ? "", cargoCache ? false }:
 let
   utils = import ./utils.nix { inherit pkgs; };
   inherit (utils) generate_port_from_path;
 in
 pkgs.writeShellApplication {
   name = "opencode${if variant != "" then "-${variant}" else ""}";
-  runtimeInputs = [ pkgs.docker ];
+  runtimeInputs = [ pkgs.go-task ];
   text = ''
     IMAGE_NAME="${imageName}"
     USER="user"
+    VARIANT="${variant}"
 
-    # Load image if not present
     if ! docker image inspect "$IMAGE_NAME" > /dev/null 2>&1; then
-      echo "Loading opencode Docker image..." >&2
-      ${image} | docker load
+      echo "Image $IMAGE_NAME not found locally." >&2
+      echo "Building image with go-task..." >&2
+      if [[ "$VARIANT" == "rust" ]]; then
+        task build:rust
+      elif [[ "$VARIANT" == "ruby" ]]; then
+        task build:ruby
+      else
+        task build:opencode
+      fi
+      if ! docker image inspect "$IMAGE_NAME" > /dev/null 2>&1; then
+        echo "Error: Failed to build image $IMAGE_NAME" >&2
+        exit 1
+      fi
     fi
   
     # Create isolated config directory
@@ -130,11 +141,10 @@ pkgs.writeShellApplication {
       -e TZ="''${TZ:-"Asia/Taipei"}" \
       -v "opencode-cache-$PORT:/home/$USER/.cache:rw" \
       -v "opencode-local-$PORT:/home/$USER/.local:rw" \
-      -v "$CONFIG_DIR:/home/$USER/.config/opencode:$CONFIG_MOUNT_MODE" \
-      "''${WORKSPACE_MOUNT[@]}" \
-      -v /etc/localtime:/etc/localtime:ro \
-        -v /etc/timezone:/etc/timezone:ro \
-        "''${SHADOW_MOUNTS[@]}" \
+       -v "$CONFIG_DIR:/home/$USER/.config/opencode:$CONFIG_MOUNT_MODE" \
+       "''${WORKSPACE_MOUNT[@]}" \
+       -v /etc/localtime:/etc/localtime:ro \
+         "''${SHADOW_MOUNTS[@]}" \
         "''${RGIGNORE_MOUNT[@]}" \
         --workdir "$CONTAINER_WORKSPACE" \
       --name "$CONTAINER_NAME" \

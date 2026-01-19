@@ -2,72 +2,51 @@
   description = "Secure Docker wrapper for OpenCode AI";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     flake-utils.url = "github:numtide/flake-utils";
-    fenix = {
-      url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nixpkgs-ruby.url = "github:bobvanderlinden/nixpkgs-ruby";
-    opencode.url = "github:sst/opencode";
   };
 
-  outputs = { nixpkgs, flake-utils, fenix, nixpkgs-ruby, opencode, ... }:
+  outputs = { nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            nixpkgs-ruby.overlays.default
-          ];
-        };
-        fenix-pkgs = fenix.packages.${system}.stable;
-        opencode-pkg = opencode.packages.${system}.default;
-
-        opencodeImages = import ./images { 
-          inherit pkgs fenix-pkgs opencode-pkg; 
-        };
+        pkgs = import nixpkgs { inherit system; };
+        
+        # Read versions from files and strip newlines
+        opencodeVersionFile = builtins.readFile ./docker/.opencode-version;
+        opencodeVersion = builtins.replaceStrings [ "\n" ] [ "" ] opencodeVersionFile;
+        geminiVersionFile = builtins.readFile ./docker/.gemini-version;
+        geminiVersion = builtins.replaceStrings [ "\n" ] [ "" ] geminiVersionFile;
 
         mkOpencodeWrapper = import ./lib/opencode-wrapper.nix { inherit pkgs; };
         mkGeminiWrapper = import ./lib/gemini-wrapper.nix { inherit pkgs; };
 
         opencodeWrapper = mkOpencodeWrapper {
-          image = opencodeImages.opencode;
-          imageName = "agent-opencode:${opencode-pkg.version}";
+          imageName = "localhost/docker-agent-opencode:${opencodeVersion}";
         };
 
         opencodeRustWrapper = mkOpencodeWrapper {
-          image = opencodeImages.opencode-rust;
-          imageName = "agent-opencode:${opencode-pkg.version}-rust";
+          imageName = "localhost/docker-agent-opencode:${opencodeVersion}-rust";
           variant = "rust";
           cargoCache = true;
         };
 
         opencodeRubyWrapper = mkOpencodeWrapper {
-          image = opencodeImages.opencode-ruby;
-          imageName = "agent-opencode:${opencode-pkg.version}-ruby";
+          imageName = "localhost/docker-agent-opencode:${opencodeVersion}-ruby";
           variant = "ruby";
         };
 
         geminiWrapper = mkGeminiWrapper {
-          image = opencodeImages.gemini;
-          imageName = "agent-gemini-cli:${(pkgs.callPackage ./pkgs/gemini-cli-bin.nix {}).version}";
+          imageName = "localhost/docker-gemini-cli:${geminiVersion}";
         };
 
       in
       {
         packages = {
           default = opencodeWrapper;
-
           opencode = opencodeWrapper;
           opencode-rust = opencodeRustWrapper;
           opencode-ruby = opencodeRubyWrapper;
-
           gemini = geminiWrapper;
-
-          opencode-image-script = opencodeImages.opencode;
-          opencode-rust-image-script = opencodeImages.opencode-rust;
-          opencode-ruby-image-script = opencodeImages.opencode-ruby;
         };
       }
     );

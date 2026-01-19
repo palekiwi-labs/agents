@@ -1,0 +1,23 @@
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    fd-find \
+    git \
+    gnupg \
+    jq \
+    ripgrep \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -g 1000 user && \
+    useradd -u 1000 -g user -m -d /home/user user && \
+    mkdir -p /workspace \
+             /home/user/.cache \
+             /home/user/.local \
+             /home/user/.cargo \
+             /home/user/.bundle && \
+    chown -R user:user /workspace /home/user
+
+USER user
+WORKDIR /workspace
